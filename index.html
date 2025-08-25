@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Café Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo">☕ Coffee&Letters</div>
+    <nav>
+      <button onclick="mostrarSeccion('home')">Inicio</button>
+      <button onclick="mostrarSeccion('menu')">Menú</button>
+      <button onclick="mostrarSeccion('reservas')">Reservas</button>
+      <button onclick="mostrarSeccion('liros')">Libros</button>
+      <button onclick="mostrarSeccion('historial')">Historial</button>
+      <button onclick="mostrarSeccion('info')">info</button>
+    </nav>
+    <div id="authButtons"></div>
+  </header>
+  
+  <!-- Hero -->
+  <section class="hero seccion activa" id="home">
+    <div class="hero-text">
+      <h1>Tu café de estudio y lectura</h1>
+      <p>Reservá tu lugar, alquilá un libro y pedí tu combo favorito.</p>
+      <button onclick="mostrarSeccion('menu')">Ver menú</button>
+      <button onclick="mostrarSeccion('reservas')">Reservar</button>
+    </div>
+  </section>
+
+  <!-- Información -->
+  <section class="seccion" id="info">
+    <h2>Sobre el café</h2>
+    <div class="card">
+      <img src="https://via.placeholder.com/300x200" alt="café">
+      <p>Un espacio con Wi-Fi, PCs, libros y granos de café seleccionados.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Horarios</h3>
+        <p>Lunes a Domingo<br>9:00 – 22:00</p>
+      </div>
+      <div class="card">
+        <h3>Contacto</h3>
+        <p>📞 +54 11 1234-5678<br>📧 hola@cafehub.ar<br>📍 Av. Siempre Viva 123, CABA</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menú -->
+  <section class="seccion" id="menu">
+    <h2>Nuestro menú</h2>
+    <div id="listaMenu" class="grid"></div>
+  </section>
+
+  <!-- Reservas -->
+  <section class="seccion" id="reservas">
+    <h2>Reservas</h2>
+    <form id="formReserva" class="form">
+      <label>Tipo:
+        <select id="tipoReserva">
+          <option value="mesa">Mesa</option>
+          <option value="pc">Computadora</option>
+        </select>
+      </label>
+      <label>Personas: <input type="number" id="personas" min="1" value="1"></label>
+      <label>Fecha: <input type="date" id="fechaReserva"></label>
+      <label>Hora: <input type="time" id="horaReserva"></label>
+      <button type="submit">Reservar</button>
+    </form>
+    <div id="misReservas"></div>
+  </section>
+
+  <!-- Libros -->
+  <section class="seccion" id="libros">
+    <h2>Libros disponibles</h2>
+    <div id="listaLibros" class="grid"></div>
+    <h3>Mis alquileres</h3>
+    <div id="misAlquileres"></div>
+  </section>
+
+  <!-- Historial -->
+  <section class="seccion" id="historial">
+    <h2>Historial</h2>
+    <div id="historialReservas"></div>
+    <div id="historialLibros"></div>
+  </section>
+
+  <!--Info -->
+
+  <section class="seccion" id="info">
+  <h2>Sobre Coffee&Letters</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>📍 Ubicación</h3>
+      <p>Av. Siempre Viva 123, CABA</p>
+    </div>
+    <div class="card">
+      <h3>🕒 Horarios</h3>
+      <p>Lunes a Domingo<br>9:00 – 22:00</p>
+    </div>
+    <div class="card">
+      <h3>📞 Contacto</h3>
+      <p>Tel: +54 11 1234-5678<br>
+         Email: hola@cafehub.ar</p>
+    </div>
+    <div class="card">
+      <h3>☕ El lugar</h3>
+      <p>Un espacio pensado para leer, trabajar o relajarte con café de especialidad, libros y tecnología a tu alcance.</p>
+    </div>
+  </div>
+</section>
+
+  <!-- Modal login/registro -->
+  <div id="modalAuth" class="modal oculto">
+    <div class="modal-content">
+      <h3 id="tituloModal"></h3>
+      <form id="formAuth" class="form">
+        <input type="text" id="nombre" placeholder="Nombre (solo registro)">
+        <input type="email" id="email" placeholder="Correo">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button type="submit" id="btnAuth">Aceptar</button>
+        <button type="button" onclick="cerrarModal()">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Coffee&Letters · Hecho con ☕</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
