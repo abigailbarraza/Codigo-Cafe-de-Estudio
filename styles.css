@@ -76,3 +76,49 @@ footer {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
+/* Carrusel de libros */
+.carrusel {
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.carrusel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carrusel-track .card {
+  min-width: 200px;
+  margin: 0 10px;
+  text-align: center;
+}
+
+.carrusel-track img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.carrusel button.prev,
+.carrusel button.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.carrusel button.prev { left: 5px; }
+.carrusel button.next { right: 5px; }

@@ -15,9 +15,9 @@
       <button onclick="mostrarSeccion('home')">Inicio</button>
       <button onclick="mostrarSeccion('menu')">Menú</button>
       <button onclick="mostrarSeccion('reservas')">Reservas</button>
-      <button onclick="mostrarSeccion('liros')">Libros</button>
+      <button onclick="mostrarSeccion('libros')">Libros</button>
       <button onclick="mostrarSeccion('historial')">Historial</button>
-      <button onclick="mostrarSeccion('info')">info</button>
+      <button onclick="mostrarSeccion('info')">Info</button>
     </nav>
     <div id="authButtons"></div>
   </header>
@@ -32,21 +32,35 @@
     </div>
   </section>
 
+  <!-- Carrusel Libros más alquilados -->
+  <section class="seccion" id="topLibros">
+    <h2>Libros más alquilados</h2>
+    <div class="carrusel">
+      <button class="prev" onclick="moverCarrusel(-1)">&#10094;</button>
+      <div class="carrusel-track" id="carruselLibros"></div>
+      <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
+    </div>
+  </section>
+
   <!-- Información -->
   <section class="seccion" id="info">
-    <h2>Sobre el café</h2>
-    <div class="card">
-      <img src="https://via.placeholder.com/300x200" alt="café">
-      <p>Un espacio con Wi-Fi, PCs, libros y granos de café seleccionados.</p>
-    </div>
+    <h2>Sobre Coffee&Letters</h2>
     <div class="grid">
       <div class="card">
-        <h3>Horarios</h3>
+        <h3>📍 Ubicación</h3>
+        <p>Av. Siempre Viva 123, CABA</p>
+      </div>
+      <div class="card">
+        <h3>🕒 Horarios</h3>
         <p>Lunes a Domingo<br>9:00 – 22:00</p>
       </div>
       <div class="card">
-        <h3>Contacto</h3>
-        <p>📞 +54 11 1234-5678<br>📧 hola@cafehub.ar<br>📍 Av. Siempre Viva 123, CABA</p>
+        <h3>📞 Contacto</h3>
+        <p>Tel: +54 11 1234-5678<br>Email: hola@cafehub.ar</p>
+      </div>
+      <div class="card">
+        <h3>☕ El lugar</h3>
+        <p>Un espacio pensado para leer, trabajar o relajarte con café de especialidad, libros y tecnología a tu alcance.</p>
       </div>
     </div>
   </section>
@@ -89,31 +103,6 @@
     <div id="historialReservas"></div>
     <div id="historialLibros"></div>
   </section>
-
-  <!--Info -->
-
-  <section class="seccion" id="info">
-  <h2>Sobre Coffee&Letters</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>📍 Ubicación</h3>
-      <p>Av. Siempre Viva 123, CABA</p>
-    </div>
-    <div class="card">
-      <h3>🕒 Horarios</h3>
-      <p>Lunes a Domingo<br>9:00 – 22:00</p>
-    </div>
-    <div class="card">
-      <h3>📞 Contacto</h3>
-      <p>Tel: +54 11 1234-5678<br>
-         Email: hola@cafehub.ar</p>
-    </div>
-    <div class="card">
-      <h3>☕ El lugar</h3>
-      <p>Un espacio pensado para leer, trabajar o relajarte con café de especialidad, libros y tecnología a tu alcance.</p>
-    </div>
-  </div>
-</section>
 
   <!-- Modal login/registro -->
   <div id="modalAuth" class="modal oculto">

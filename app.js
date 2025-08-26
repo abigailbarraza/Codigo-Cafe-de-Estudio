@@ -162,6 +162,27 @@ function renderTopLibros() {
       <span>Alquilado ${b.veces} veces</span>
     </div>`).join("");
 }
+// ---------------- Carrusel ----------------
+let posicionCarrusel = 0;
+
+function moverCarrusel(direccion) {
+  const track = document.getElementById("carruselLibros");
+  const itemWidth = 220; // ancho aproximado de cada tarjeta + margen
+  const totalItems = track.children.length;
+  const maxPosition = -(itemWidth * (totalItems - 4)); // ajusta 4 items visibles
+  posicionCarrusel += direccion * itemWidth;
+  if (posicionCarrusel > 0) posicionCarrusel = 0;
+  if (posicionCarrusel < maxPosition) posicionCarrusel = maxPosition;
+  track.style.transform = `translateX(${posicionCarrusel}px)`;
+}
+
+// Actualizar carrusel automáticamente cada 4 segundos
+setInterval(() => {
+  moverCarrusel(1);
+  const track = document.getElementById("carruselLibros");
+  const totalItems = track.children.length;
+  if (Math.abs(posicionCarrusel) >= 220 * (totalItems - 4)) posicionCarrusel = 0;
+}, 4000);
 
 
 // ---------------- Inicializar ----------------
@@ -171,6 +192,8 @@ renderLibros();
 renderReservas();
 renderMisAlquileres();
 renderHistorial();
+renderTopLibros();
+
 
 
 
