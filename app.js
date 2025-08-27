@@ -15,7 +15,12 @@ const menu = [
 const libros = [
   { id: 1, titulo: "Cien años de soledad", autor: "García Márquez", genero: "Realismo mágico", copias: 3, img: "https://via.placeholder.com/300x200" },
   { id: 2, titulo: "Rayuela", autor: "Cortázar", genero: "Ficción", copias: 2, img: "https://via.placeholder.com/300x200" },
-  { id: 3, titulo: "Dune", autor: "Frank Herbert", genero: "Ciencia ficción", copias: 4, img: "https://via.placeholder.com/300x200" }
+  { id: 3, titulo: "Dune", autor: "Frank Herbert", genero: "Ciencia ficción", copias: 4, img: "https://via.placeholder.com/300x200" },
+  { id: 4, titulo: "A todos los chicos de los que me enamoré", autor: "Jenny Han", genero: "Rom-Com", copias: 5, img: "https://via.placeholder.com/300x200" },
+  { id: 5, titulo: "El verano en que me enamoré", autor: "Jenny Han", genero: "Rom-Com", copias: 3, img: "https://via.placeholder.com/300x200" },
+  { id: 6, titulo: "Tienes un email", autor: "Nora Ephron", genero: "Rom-Com", copias: 2, img: "https://via.placeholder.com/300x200" },
+  { id: 7, titulo: "La hipótesis del amor", autor: "Ali Hazelwood", genero: "Rom-Com", copias: 6, img: "https://via.placeholder.com/300x200" },
+  { id: 8, titulo: "People We Meet on Vacation", autor: "Emily Henry", genero: "Rom-Com", copias: 4, img: "https://via.placeholder.com/300x200" }
 ];
 
 // ---------------- Navegación ----------------

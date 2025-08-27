@@ -82,7 +82,7 @@ footer {
   overflow: hidden;
   max-width: 900px;
   margin: 20px auto;
-  background: #fff;
+  background: gray;
   border-radius: 12px;
   padding: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -111,7 +111,7 @@ footer {
   top: 50%;
   transform: translateY(-50%);
   background-color: rgba(0,0,0,0.5);
-  color: white;
+  color: black;
   border: none;
   font-size: 2rem;
   padding: 5px 10px;
@@ -122,3 +122,21 @@ footer {
 
 .carrusel button.prev { left: 5px; }
 .carrusel button.next { right: 5px; }
+
+/* Ajustes para el carrusel */
+.carrusel-track .card {
+  background: #fff;       /* fondo blanco para contraste */
+  color: #222;            /* texto oscuro */
+}
+
+.carrusel-track .card h4,
+.carrusel-track .card p,
+.carrusel-track .card span {
+  color: #222;            /* todos los textos en oscuro */
+}
+/* Título del carrusel */
+#home h2 {
+  color: #222;
+  text-align: center;
+  margin-bottom: 10px;
+}
