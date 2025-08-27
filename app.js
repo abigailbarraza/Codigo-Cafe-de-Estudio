@@ -23,10 +23,38 @@ const libros = [
   { id: 8, titulo: "People We Meet on Vacation", autor: "Emily Henry", genero: "Rom-Com", copias: 4, img: "https://via.placeholder.com/300x200" }
 ];
 
-// ---------------- Navegación ----------------
+// ---------------- Navegación con animación ----------------
+let secciones = ["home", "menu", "reservas", "libros", "historial", "info"];
+let seccionActual = "home";
+
 function mostrarSeccion(id) {
-  document.querySelectorAll(".seccion").forEach(s => s.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
+  if (id === seccionActual) return;
+
+  const actual = document.getElementById(seccionActual);
+  const target = document.getElementById(id);
+
+  const dir = secciones.indexOf(id) > secciones.indexOf(seccionActual) ? "right" : "left";
+
+  // ocultar la actual
+  actual.classList.remove("activa");
+  actual.style.display = "none";
+
+  // preparar la nueva
+  target.style.display = "block";
+  target.classList.remove("slide-in-left", "slide-in-right");
+
+  if (dir === "right") {
+    target.classList.add("slide-in-right");
+  } else {
+    target.classList.add("slide-in-left");
+  }
+
+  setTimeout(() => {
+    target.classList.add("activa");
+    target.classList.remove("slide-in-left", "slide-in-right");
+  }, 10);
+
+  seccionActual = id;
 }
 
 // ---------------- Autenticación ----------------
@@ -152,6 +180,8 @@ function renderHistorial() {
     return `<div>${libro.titulo} - ${a.devuelto ? "Devuelto" : "En curso"}</div>`;
   }).join("") || "Sin historial");
 }
+
+// ---------------- Ranking de libros ----------------
 function renderTopLibros() {
   const ranking = libros.map(l => {
     const veces = alquileres.filter(a => a.idLibro === l.id).length;
@@ -159,36 +189,38 @@ function renderTopLibros() {
   }).sort((a,b) => b.veces - a.veces).slice(0,5);
 
   const div = document.getElementById("carruselLibros");
+  if (ranking.length === 0) {
+    div.innerHTML = "<p>No hay libros en el ranking todavía.</p>";
+    return;
+  }
+
   div.innerHTML = ranking.map(b => `
     <div class="card">
       <img src="${b.img}" alt="${b.titulo}">
       <h4>${b.titulo}</h4>
       <p>${b.autor}</p>
-      <span>Alquilado ${b.veces} veces</span>
+      <span>Alquilado ${b.veces} ${b.veces === 1 ? "vez" : "veces"}</span>
     </div>`).join("");
 }
+
 // ---------------- Carrusel ----------------
 let posicionCarrusel = 0;
-
 function moverCarrusel(direccion) {
   const track = document.getElementById("carruselLibros");
-  const itemWidth = 220; // ancho aproximado de cada tarjeta + margen
+  const itemWidth = 220;
   const totalItems = track.children.length;
-  const maxPosition = -(itemWidth * (totalItems - 4)); // ajusta 4 items visibles
+  const maxPosition = -(itemWidth * (totalItems - 4));
   posicionCarrusel += direccion * itemWidth;
   if (posicionCarrusel > 0) posicionCarrusel = 0;
   if (posicionCarrusel < maxPosition) posicionCarrusel = maxPosition;
   track.style.transform = `translateX(${posicionCarrusel}px)`;
 }
-
-// Actualizar carrusel automáticamente cada 4 segundos
 setInterval(() => {
   moverCarrusel(1);
   const track = document.getElementById("carruselLibros");
   const totalItems = track.children.length;
   if (Math.abs(posicionCarrusel) >= 220 * (totalItems - 4)) posicionCarrusel = 0;
 }, 4000);
-
 
 // ---------------- Inicializar ----------------
 renderAuthButtons();
@@ -198,8 +230,3 @@ renderReservas();
 renderMisAlquileres();
 renderHistorial();
 renderTopLibros();
-
-
-
-
-
