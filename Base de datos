@@ -1,0 +1,32 @@
+CREATE DATABASE coffeandletters;
+use coffeandletters;
+
+CREATE TABLE usuario (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(99) NOT NULL,
+    contraseña INT NOT NULL,
+    cantidad_reservas INT,
+    email VARCHAR(99),
+    numero_telefono INT
+) ENGINE = InnoDB;
+
+CREATE TABLE reserva (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    fecha DATETIME,
+    cantidad_personas INT,
+    sucursal POINT,
+    cantidad_computadoras INT,
+    precio DECIMAL(100,9) NOT NULL,
+    FOREIGN KEY reserva (id_usuario) REFERENCES usuario (id)
+)ENGINE = InnoDB;
+
+CREATE TABLE libro(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    titulo VARCHAR(99),
+    fecha DATETIME,
+    fecha_entrega DATETIME,
+    precio DECIMAL(100,9) NOT NULL,
+    FOREIGN KEY libro(id_usuario) REFERENCES usuario(id)
+)ENGINE = InnoDB;
