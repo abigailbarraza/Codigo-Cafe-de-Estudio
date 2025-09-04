@@ -15,12 +15,13 @@ const libros = [
   { id: 6, titulo: "Tienes un email", autor: "Nora Ephron", genero: "Rom-Com", copias: 2, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQegCV4sunSNno6pqHCMWZ6Pr4TXXWhkZ7pCw&s", sinopsis: "Dos rivales comerciales descubren que son almas gemelas online." },
   { id: 7, titulo: "La hipótesis del amor", autor: "Ali Hazelwood", genero: "Rom-Com", copias: 6, img: "https://images.cdn2.buscalibre.com/fit-in/360x360/17/51/1751c3b138121d658d12617c581203d4.jpg", sinopsis: "Una comedia romántica ambientada en el mundo académico." },
   { id: 8, titulo: "People We Meet on Vacation", autor: "Emily Henry", genero: "Rom-Com", copias: 4, img: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1748450140i/54985743.jpg", sinopsis: "Dos mejores amigos viajan cada verano juntos hasta que algo cambia." },
-  { id: 9, titulo: "Orgullo y Prejuicio", autor: "Jane Austen", gemero:"Romance", copias: 4, img:"https://images.cdn2.buscalibre.com/fit-in/360x360/69/73/697367de2a03bc98c4cb963d35ae2af2.jpg",  sinopsis: "La historia de Elizabeth Bennet y el señor Darcy, quienes deben superar sus prejuicios y diferencias sociales para descubrir el verdadero amor."},
-  { id: 10,titulo:"IT", autor: "Stephen King", genero: "terror", copias: 3, img:"https://images.cdn3.buscalibre.com/fit-in/360x360/df/43/df43923a18c57cfc02206ef54e50f192.jpg", sinopsis: "Un grupo de amigos de la infancia enfrenta a un ser maligno que adopta la forma de sus peores miedos, especialmente el payaso Pennywise, y regresa años después para acabar con él definitivamente."},
-  { id: 11,titulo:"Dracula", autor: "Bram Stoker",genero: "Terror", copias: 5, img:"https://images.cdn1.buscalibre.com/fit-in/360x360/53/c4/53c4c47d539b4e352cb284b18e2c80f8.jpg", sinopsis: "El conde Drácula viaja desde Transilvania a Inglaterra para expandir su maldición, mientras un grupo de personas lideradas por Van Helsing lucha por detenerlo." },
-  { id: 12, titulo: "Romper El Circulo", autor: "Colleen Hoover", genero: "Rom-Com", copias: 6, img:"https://images.cdn3.buscalibre.com/fit-in/360x360/aa/c4/aac495a3ef1a84293a0e7771c26b5c4e.jpg", sinopsis: "Lily Bloom inicia una relación con Ryle, un brillante neurocirujano, pero debe enfrentarse a dolorosas decisiones cuando el pasado y la violencia amenazan su futuro."}
-
-
+  { id: 9, titulo: "Orgullo y Prejuicio", autor: "Jane Austen", genero:"Romance", copias: 4, img:"https://images.cdn2.buscalibre.com/fit-in/360x360/69/73/697367de2a03bc98c4cb963d35ae2af2.jpg",  sinopsis: "La historia de Elizabeth Bennet y el señor Darcy, quienes deben superar sus prejuicios y diferencias sociales para descubrir el verdadero amor."},
+  { id: 10,titulo:"IT", autor: "Stephen King", genero: "Terror", copias: 3, img:"https://images.cdn3.buscalibre.com/fit-in/360x360/df/43/df43923a18c57cfc02206ef54e50f192.jpg", sinopsis: "Un grupo de amigos enfrenta a un ser maligno que adopta la forma de sus peores miedos."},
+  { id: 11,titulo:"Dracula", autor: "Bram Stoker", genero: "Terror", copias: 5, img:"https://images.cdn1.buscalibre.com/fit-in/360x360/53/c4/53c4c47d539b4e352cb284b18e2c80f8.jpg", sinopsis: "El conde Drácula viaja desde Transilvania a Inglaterra para expandir su maldición." },
+  { id: 12, titulo: "Romper El Circulo", autor: "Colleen Hoover", genero: "Rom-Com", copias: 6, img:"https://images.cdn3.buscalibre.com/fit-in/360x360/aa/c4/aac495a3ef1a84293a0e7771c26b5c4e.jpg", sinopsis: "Lily Bloom inicia una relación con Ryle, pero debe enfrentarse a decisiones difíciles."},
+  { id: 13, titulo: "Cementerio de Animales", autor: "Stephen King", genero:"Terror", copias: 4, img:"https://images.cdn2.buscalibre.com/fit-in/360x360/95/5b/955be07d4a94383ea56271dc865e5e8c.jpg", sinopsis: "Un cementerio cercano puede devolver a los muertos, pero con consecuencias horribles."},
+  { id: 14, titulo: "Los 7 Maridos de Evelyn Hugo", autor: "Taylor Jenkins Reid", genero:"Novela", copias: 5, img:"https://data.livriz.com/media/mediaspace/F9AFB48D-741D-4834-B760-F59344EEFF34/45/24f40356-528a-4173-97ac-8a3bdfa65b7d/9789871886265.jpg", sinopsis:"La vida de una actriz de Hollywood y sus siete matrimonios."},
+  { id: 15, titulo: "Farsa de amor a la Española", autor: "Elena Armas", genero: "Rom-Com", copias: 5, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9U6uCRLhb1-B1TnCCUQBucIQP0wYwuAB5rw&s", sinopsis:"Historia de engaños, celos y malentendidos en busca del amor."}
 ];
 
 // ---------------- Navegación ----------------
@@ -44,12 +45,12 @@ function renderAuthButtons() {
     div.innerHTML = `<button onclick="abrirModal('login')">Iniciar sesión</button><button onclick="abrirModal('registro')">Registrarse</button>`;
   }
 }
-function abrirModal(tipo) { document.getElementById("modalAuth").classList.remove("oculto"); document.getElementById("tituloModal").textContent = tipo==="login"?"Iniciar sesión":"Registrarse"; }
+function abrirModal(tipo) { 
+  document.getElementById("modalAuth").classList.remove("oculto"); 
+  document.getElementById("tituloModal").textContent = tipo==="login"?"Iniciar sesión":"Registrarse"; 
+}
 function cerrarModal() { document.getElementById("modalAuth").classList.add("oculto"); }
 function logout(){ session=null; localStorage.removeItem("session"); renderAuthButtons(); }
-
-// ---------------- Reservas ----------------
-// (igual que antes, no lo repito por espacio)
 
 // ---------------- Libros ----------------
 function renderLibros() {
@@ -62,6 +63,7 @@ function renderLibros() {
 }
 function renderMisAlquileres() {
   const div = document.getElementById("misAlquileres");
+  if (!div) return; // si ya no existe en HTML
   const mios = alquileres.filter(a=>a.usuario===session?.email);
   div.innerHTML = mios.map(a=>{
     const libro=libros.find(l=>l.id===a.idLibro);
@@ -72,6 +74,7 @@ function renderMisAlquileres() {
 // ---------------- Formulario alquiler ----------------
 function initFormAlquiler() {
   const select = document.getElementById("libroAlquiler");
+  if (!select) return;
   select.innerHTML = '<option value="">-- Seleccioná un libro --</option>' + 
     libros.map(l => `<option value="${l.id}">${l.titulo}</option>`).join("");
   if (session) {
@@ -81,7 +84,10 @@ function initFormAlquiler() {
 
 // Abrir modal de alquiler desde botón
 function prepararAlquiler(idLibro) {
-  if (!session) return mostrarMsg("Debes iniciar sesión","error");
+  if (!session) {
+    alert("⚠️ Debes iniciar sesión o registrarte para alquilar un libro.");
+    return;
+  }
   libroSeleccionado = idLibro;
   document.getElementById("libroAlquiler").value = idLibro;
   document.getElementById("usuarioAlquiler").value = session.email;
@@ -93,10 +99,13 @@ function cerrarModalAlquiler() {
   document.getElementById("modalAlquiler").classList.add("oculto");
 }
 
-// Evento submit
+// Evento submit alquiler
 document.getElementById("formAlquiler").addEventListener("submit", e => {
   e.preventDefault();
-  if (!session) return mostrarMsg("Iniciá sesión","error");
+  if (!session) {
+    alert("⚠️ Debes iniciar sesión o registrarte para alquilar un libro.");
+    return;
+  }
   if (!libroSeleccionado) return mostrarMsg("No seleccionaste libro","error");
   const fecha = document.getElementById("fechaDevolucion").value;
   if (!fecha) return mostrarMsg("Elegí una fecha","error");
@@ -113,10 +122,35 @@ document.getElementById("formAlquiler").addEventListener("submit", e => {
 
 function mostrarMsg(txt, tipo){
   const div = document.getElementById("msgAlquiler");
+  if (!div) return;
   div.textContent = txt;
   div.style.color = tipo==="error" ? "red" : "green";
   setTimeout(()=>div.textContent="", 3000);
 }
+
+// ---------------- Reservas ----------------
+document.getElementById("formReserva").addEventListener("submit", e => {
+  e.preventDefault();
+  if (!session) {
+    alert("⚠️ Debes iniciar sesión o registrarte para hacer una reserva.");
+    return;
+  }
+
+  const tipo = document.getElementById("tipoReserva").value;
+  const personas = document.getElementById("personas").value;
+  const fecha = document.getElementById("fechaReserva").value;
+  const hora = document.getElementById("horaReserva").value;
+
+  if (!fecha || !hora) {
+    alert("⚠️ Debes completar la fecha y la hora.");
+    return;
+  }
+
+  reservas.push({ tipo, personas, fecha, hora, usuario: session.email });
+  localStorage.setItem("reservas", JSON.stringify(reservas));
+
+  alert("✅ Reserva confirmada");
+});
 
 // ---------------- Modal detalle ----------------
 function verDetalleLibro(id){
