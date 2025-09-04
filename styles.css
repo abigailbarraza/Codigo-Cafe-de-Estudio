@@ -1,4 +1,199 @@
-.espacio foto {
-    width: 200px;
-    height: auto;
+/* Reset básico */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #fafafa; color: #333; }
+
+/* Navbar */
+header {
+  background: #222; color: #fff; padding: 10px 20px;
+  display: flex; justify-content: space-between; align-items: center;
 }
+header .logo { font-weight: bold; font-size: 1.2em; }
+nav button {
+  background: #fff; border: none; margin: 0 5px; padding: 6px 12px;
+  border-radius: 20px; cursor: pointer; transition: background 0.3s;
+}
+nav button:hover { background: #ddd; }
+
+/* Secciones con animación */
+.seccion {
+  display: none;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.4s ease;
+}
+.seccion.activa {
+  display: block;
+  opacity: 1;
+  transform: translateX(0);
+}
+.slide-in-right { transform: translateX(100%); }
+.slide-in-left { transform: translateX(-100%); }
+
+/* Hero pantalla completa */
+.hero {
+  position: relative;
+  background: url("https://portugalglobal.pt/media/qwkiwusw/cafe_r.jpeg?quality=80&rnd=133872865448870000") center/cover no-repeat;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  color: #fff;
+  padding: 0 10%;
+}
+
+.hero-overlay {
+  background: rgba(0,0,0,0.5);
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 600px;
+}
+
+.hero-overlay h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.hero-overlay h1 span {
+  font-weight: bold;
+  font-size: 3rem;
+  display: block;
+}
+
+.hero-overlay p {
+  margin: 15px 0;
+  font-size: 1.1rem;
+}
+
+.hero-overlay button {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.hero-overlay button:hover { background: #ddd; }
+
+/* Cards */
+.card {
+  background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 15px; margin: 10px; text-align: center;
+}
+.card img { width: 100%; border-radius: 10px; }
+
+/* Grid */
+.grid {
+  display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* Formularios */
+.form {
+  display: grid; gap: 10px; max-width: 400px; margin: 10px 0;
+}
+.form input, .form select, .form button {
+  padding: 8px; border: 1px solid #ccc; border-radius: 6px;
+}
+.form button {
+  background: #222; color: #fff; cursor: pointer;
+}
+.form button:hover { background: #444; }
+
+/* Feedback de formularios */
+#msgAlquiler {
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* Modal */
+.modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+}
+.modal.oculto { display: none; }
+.modal-content {
+  background: #fff; padding: 20px; border-radius: 10px; width: 300px;
+}
+
+/* Footer */
+footer {
+  background: #222; color: #ccc; text-align: center; padding: 10px;
+  margin-top: 20px;
+}
+
+#info .card {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+#info .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Carrusel de libros */
+.carrusel {
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 20px auto;
+  background: gray;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.carrusel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+.carrusel-track .card {
+  min-width: 200px;
+  margin: 0 10px;
+  text-align: center;
+}
+.carrusel-track img {
+  width: auto;
+  height: 160px;
+  margin-bottom: 5px;
+  object-fit: cover;
+}
+.carrusel button.prev,
+.carrusel button.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.5);
+  color: black;
+  border: none;
+  font-size: 2rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* Personalización modal de alquiler */
+#modalAlquiler .modal-content {
+  background: #3e2723; /* marrón oscuro */
+  color: #fff;
+}
+#modalAlquiler input, 
+#modalAlquiler select {
+  border: 1px solid #795548;
+}
+#modalAlquiler button {
+  background: #5d4037;
+  color: #fff;
+}
+#modalAlquiler button:hover {
+  background: #4e342e;
+}
+
+
+.carrusel button.prev { left: 5px; }
+.carrusel button.next { right: 5px; }
+.carrusel-track .card { background: #fff; color: #222; }
+.carrusel-track .card h4,
+.carrusel-track .card p,
+.carrusel-track .card span { color: #222; }
+#home h2 { color:#4B2E2B ; text-align: center; margin-bottom: 10px; }

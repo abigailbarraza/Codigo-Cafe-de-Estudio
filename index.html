@@ -70,6 +70,7 @@
     <div id="listaMenu" class="grid"></div>
   </section>
 
+
   <!-- Reservas -->
   <section class="seccion" id="reservas">
     <h2>Reservas</h2>
@@ -92,6 +93,24 @@
   <section class="seccion" id="libros">
     <h2>Libros disponibles</h2>
     <div id="listaLibros" class="grid"></div>
+
+    <h3>Alquilar un libro</h3>
+    <form id="formAlquiler" class="form">
+      <label>Título del libro:
+        <select id="libroAlquiler" required>
+          <option value="">-- Seleccioná un libro --</option>
+        </select>
+      </label>
+      <label>Fecha de devolución:
+        <input type="date" id="fechaDevolucion" required>
+      </label>
+      <label>Usuario:
+        <input type="text" id="usuarioAlquiler" readonly>
+      </label>
+      <button type="submit">Alquilar</button>
+    </form>
+    <div id="msgAlquiler"></div>
+
     <h3>Mis alquileres</h3>
     <div id="misAlquileres"></div>
   </section>
@@ -117,10 +136,46 @@
     </div>
   </div>
 
+  <!-- Modal detalle libro -->
+  <div id="modalLibro" class="modal oculto">
+    <div class="modal-content" style="max-width:500px;">
+      <h3 id="detalleTitulo"></h3>
+      <img id="detalleImg" style="width:100%; border-radius:10px; margin:10px 0;">
+      <p id="detalleAutor"></p>
+      <p id="detalleGenero"></p>
+      <p id="detalleSinopsis"></p>
+      <div id="detalleAcciones"></div>
+      <button onclick="cerrarModalLibro()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal alquiler -->
+<div id="modalAlquiler" class="modal oculto">
+  <div class="modal-content" style="max-width:400px;">
+    <h3>Formulario de Alquiler</h3>
+    <form id="formAlquiler" class="form">
+      <label>Libro:
+        <select id="libroAlquiler"></select>
+      </label>
+      <label>Usuario:
+        <input type="text" id="usuarioAlquiler" readonly>
+      </label>
+      <label>Fecha de devolución:
+        <input type="date" id="fechaDevolucion">
+      </label>
+      <button type="submit">Confirmar</button>
+      <button type="button" onclick="cerrarModalAlquiler()">Cancelar</button>
+    </form>
+    <div id="msgAlquiler"></div>
+  </div>
+</div>
+
+
   <footer>
     <p>© 2025 Coffee&Letters · Hecho con ☕</p>
   </footer>
 
   <script src="app.js"></script>
+
 </body>
 </html>
