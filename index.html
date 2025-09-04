@@ -99,24 +99,11 @@
  <!-- Libros -->
   <section class="seccion" id="libros">
     <h2>Libros disponibles</h2>
-    <div id="listaLibros" class="grid"></div>
 
-    <h3>Alquilar un libro</h3>
-    <form id="formAlquiler" class="form">
-      <label>Título del libro:
-        <select id="libroAlquiler" required>
-          <option value="">-- Seleccioná un libro --</option>
-        </select>
-      </label>
-      <label>Fecha de devolución:
-        <input type="date" id="fechaDevolucion" required>
-      </label>
-      <label>Usuario:
-        <input type="text" id="usuarioAlquiler" readonly>
-      </label>
-      <button type="submit">Alquilar</button>
-    </form>
-    <div id="msgAlquiler"></div>
+    <!-- 🔹 Tabs de géneros -->
+    <div id="filtrosGeneros" class="filtros"></div>
+
+    <div id="listaLibros" class="grid"></div>
 
     <h3>Mis alquileres</h3>
     <div id="misAlquileres"></div>
@@ -127,6 +114,7 @@
     <h2>Historial</h2>
     <div id="historialReservas"></div>
     <div id="historialLibros"></div>
+    
   </section>
 
   <!-- Modal login/registro -->

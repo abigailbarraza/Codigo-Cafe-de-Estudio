@@ -172,6 +172,30 @@ footer {
   z-index: 10;
 }
 
+/* Tabs de géneros */
+.filtros {
+  margin: 15px 0;
+  text-align: center;
+}
+.filtros .tab-btn {
+  background: #eee;
+  color: #333;
+  border: none;
+  padding: 10px 18px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+.filtros .tab-btn:hover {
+  background: #ddd;
+}
+.filtros .tab-btn.activo {
+  background: #4B2E2B; /* marrón oscuro */
+  color: #fff;
+}
+
 /* Personalización modal de alquiler */
 #modalAlquiler .modal-content {
   background: #3e2723; /* marrón oscuro */
@@ -188,7 +212,6 @@ footer {
 #modalAlquiler button:hover {
   background: #4e342e;
 }
-
 
 .carrusel button.prev { left: 5px; }
 .carrusel button.next { right: 5px; }

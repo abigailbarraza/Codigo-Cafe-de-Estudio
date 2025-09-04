@@ -1,11 +1,11 @@
-// ---------------- Datos iniciales ----------------
+// Datos iniciales 
 let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 let session = JSON.parse(localStorage.getItem("session")) || null;
 let reservas = JSON.parse(localStorage.getItem("reservas")) || [];
 let alquileres = JSON.parse(localStorage.getItem("alquileres")) || [];
 let libroSeleccionado = null;
 
-// ---------------- Libros ----------------
+// Libros 
 const libros = [
   { id: 1, titulo: "Cien años de soledad", autor: "García Márquez", genero: "Realismo mágico", copias: 3, img: "https://images.cdn3.buscalibre.com/fit-in/360x360/50/a3/50a33f98323772d2c61aa4b5b2e9c9c4.jpg", sinopsis: "La historia de la familia Buendía en Macondo." },
   { id: 2, titulo: "Rayuela", autor: "Cortázar", genero: "Ficción", copias: 2, img: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Rayuela_JC.png", sinopsis: "Una novela innovadora que permite múltiples formas de lectura." },
@@ -24,7 +24,7 @@ const libros = [
   { id: 15, titulo: "Farsa de amor a la Española", autor: "Elena Armas", genero: "Rom-Com", copias: 5, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9U6uCRLhb1-B1TnCCUQBucIQP0wYwuAB5rw&s", sinopsis:"Historia de engaños, celos y malentendidos en busca del amor."}
 ];
 
-// ---------------- Navegación ----------------
+//  Navegación 
 let secciones = ["home", "menu", "reservas", "libros", "historial", "info"];
 let seccionActual = "home";
 function mostrarSeccion(id) {
@@ -36,7 +36,7 @@ function mostrarSeccion(id) {
   seccionActual = id;
 }
 
-// ---------------- Autenticación ----------------
+//  Autenticación 
 function renderAuthButtons() {
   const div = document.getElementById("authButtons");
   if (session) {
@@ -52,18 +52,95 @@ function abrirModal(tipo) {
 function cerrarModal() { document.getElementById("modalAuth").classList.add("oculto"); }
 function logout(){ session=null; localStorage.removeItem("session"); renderAuthButtons(); }
 
-// ---------------- Libros ----------------
-function renderLibros() {
+// Manejo de login y registro
+document.getElementById("formAuth").addEventListener("submit", e => {
+  e.preventDefault();
+  const nombre = document.getElementById("nombre").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const titulo = document.getElementById("tituloModal").textContent;
+
+  if (!email || !password) {
+    alert("⚠️ Completa todos los campos.");
+    return;
+  }
+
+  if (titulo.includes("Registrarse")) {
+    // Registro
+    if (!nombre) {
+      alert("⚠️ Ingresa un nombre para registrarte.");
+      return;
+    }
+    if (usuarios.some(u => u.email === email)) {
+      alert("⚠️ Ya existe un usuario con ese correo.");
+      return;
+    }
+    const nuevoUsuario = { nombre, email, password };
+    usuarios.push(nuevoUsuario);
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    session = { nombre, email };
+    localStorage.setItem("session", JSON.stringify(session));
+    alert("✅ Registro exitoso");
+  } else {
+    // Login
+    const user = usuarios.find(u => u.email === email && u.password === password);
+    if (!user) {
+      alert("⚠️ Usuario o contraseña incorrectos.");
+      return;
+    }
+    session = { nombre: user.nombre, email: user.email };
+    localStorage.setItem("session", JSON.stringify(session));
+    alert("✅ Sesión iniciada");
+  }
+
+  cerrarModal();
+  renderAuthButtons();
+  renderMisAlquileres();
+  initFormAlquiler();
+});
+
+// Tabs de géneros
+function renderFiltros() {
+  const div = document.getElementById("filtrosGeneros");
+  if (!div) return;
+  const generos = [...new Set(libros.map(l => l.genero))];
+
+  div.innerHTML = `
+    <button class="tab-btn activo" data-genero="todos">Todos</button>
+    ${generos.map(g => `<button class="tab-btn" data-genero="${g}">${g}</button>`).join("")}
+  `;
+
+  // Evento para cada botón
+  div.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      div.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("activo"));
+      btn.classList.add("activo");
+      const genero = btn.dataset.genero;
+      renderLibros(genero === "todos" ? null : genero);
+    });
+  });
+}
+
+// Libros 
+function renderLibros(filtroGenero = null) {
   const div = document.getElementById("listaLibros");
-  div.innerHTML = libros.map(b => {
+  let lista = filtroGenero ? libros.filter(l => l.genero === filtroGenero) : libros;
+  
+  div.innerHTML = lista.map(b => {
     const activos = alquileres.filter(a => a.idLibro === b.id && !a.devuelto).length;
     const disponibles = b.copias - activos;
-    return `<div class="card" onclick="verDetalleLibro(${b.id})"><img src="${b.img}"><h4>${b.titulo}</h4><p>${b.autor}</p><strong>${disponibles>0?disponibles+" disponibles":"No disponible"}</strong></div>`;
-  }).join("");
+    return `<div class="card" onclick="verDetalleLibro(${b.id})">
+              <img src="${b.img}">
+              <h4>${b.titulo}</h4>
+              <p>${b.autor}</p>
+              <strong>${disponibles>0?disponibles+" disponibles":"No disponible"}</strong>
+            </div>`;
+  }).join("") || "<p>No hay libros en esta categoría.</p>";
 }
+
 function renderMisAlquileres() {
   const div = document.getElementById("misAlquileres");
-  if (!div) return; // si ya no existe en HTML
+  if (!div) return;
   const mios = alquileres.filter(a=>a.usuario===session?.email);
   div.innerHTML = mios.map(a=>{
     const libro=libros.find(l=>l.id===a.idLibro);
@@ -71,7 +148,7 @@ function renderMisAlquileres() {
   }).join("")||"No alquilaste libros.";
 }
 
-// ---------------- Formulario alquiler ----------------
+//  Formulario alquiler 
 function initFormAlquiler() {
   const select = document.getElementById("libroAlquiler");
   if (!select) return;
@@ -128,7 +205,7 @@ function mostrarMsg(txt, tipo){
   setTimeout(()=>div.textContent="", 3000);
 }
 
-// ---------------- Reservas ----------------
+//  Reservas 
 document.getElementById("formReserva").addEventListener("submit", e => {
   e.preventDefault();
   if (!session) {
@@ -152,7 +229,7 @@ document.getElementById("formReserva").addEventListener("submit", e => {
   alert("✅ Reserva confirmada");
 });
 
-// ---------------- Modal detalle ----------------
+// Modal detalle 
 function verDetalleLibro(id){
   const libro=libros.find(l=>l.id===id);
   document.getElementById("detalleTitulo").textContent=libro.titulo;
@@ -166,7 +243,7 @@ function verDetalleLibro(id){
 }
 function cerrarModalLibro(){ document.getElementById("modalLibro").classList.add("oculto"); }
 
-// ---------------- Ranking y carrusel ----------------
+// Ranking y carrusel 
 function renderTopLibros(){
   const ranking=libros.map(l=>{const veces=alquileres.filter(a=>a.idLibro===l.id).length; return {...l,veces};}).sort((a,b)=>b.veces-a.veces).slice(0,10);
   const div=document.getElementById("carruselLibros");
@@ -188,9 +265,10 @@ function moverCarrusel(dir){
 }
 setInterval(()=>{ moverCarrusel(1); },4000);
 
-// ---------------- Inicializar ----------------
+// Inicializar
 window.onload=()=>{
   renderAuthButtons();
+  renderFiltros();   // 🔹 Tabs de géneros
   renderLibros();
   renderMisAlquileres();
   renderTopLibros();
