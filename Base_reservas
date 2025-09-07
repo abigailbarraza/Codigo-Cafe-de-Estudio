@@ -1,0 +1,122 @@
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    # Tabla de usuarios
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+    # Tabla de reservas
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS reservas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL,
+            personas INTEGER NOT NULL,
+            fecha TEXT NOT NULL,
+            hora TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES usuarios(id)
+        )
+    """)
+    conn.commit()
+    conn.close()
+#--------------------------------------------------------------------------------------
+@app.route("/reservar", methods=["POST"])
+def reservar():
+    data = request.json
+    user_id = data.get("user_id")
+    tipo = data.get("tipo")
+    personas = data.get("personas")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+
+    if not user_id:
+        return jsonify({"status": "error", "message": "Usuario no autenticado"}), 401
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO reservas (user_id, tipo, personas, fecha, hora)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, tipo, personas, fecha, hora))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"status": "success", "message": "Reserva guardada con éxito"})
+#--------------------------------------------------------------------------------------
+@app.route("/mis_reservas/<int:user_id>", methods=["GET"])
+def mis_reservas(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, tipo, personas, fecha, hora
+        FROM reservas WHERE user_id = ?
+        ORDER BY fecha, hora
+    """, (user_id,))
+    reservas = cursor.fetchall()
+    conn.close()
+
+    reservas_json = [
+        {"id": r[0], "tipo": r[1], "personas": r[2], "fecha": r[3], "hora": r[4]}
+        for r in reservas
+    ]
+
+    return jsonify({"status": "success", "reservas": reservas_json})
+#--------------------------------------------------------------------------------------
+document.getElementById("formReserva").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const session = JSON.parse(localStorage.getItem("session"));
+  if (!session) {
+    alert("Debes iniciar sesión para reservar.");
+    return;
+  }
+
+  const tipo = document.getElementById("tipoReserva").value;
+  const personas = document.getElementById("personas").value;
+  const fecha = document.getElementById("fechaReserva").value;
+  const hora = document.getElementById("horaReserva").value;
+
+  const res = await fetch("http://127.0.0.1:5000/reservar", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      user_id: session.id,
+      tipo,
+      personas,
+      fecha,
+      hora
+    })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  if (data.status === "success") {
+    cargarReservas(session.id);
+  }
+});
+
+// 🔹 Función para mostrar reservas del usuario
+async function cargarReservas(user_id) {
+  const res = await fetch(http://127.0.0.1:5000/mis_reservas/${user_id});
+  const data = await res.json();
+
+  if (data.status === "success") {
+    const div = document.getElementById("misReservas");
+    div.innerHTML = "<h3>Mis Reservas</h3>";
+    data.reservas.forEach(r => {
+      div.innerHTML += `
+        <div class="card">
+          <p><b>Tipo:</b> ${r.tipo}</p>
+          <p><b>Personas:</b> ${r.personas}</p>
+          <p><b>Fecha:</b> ${r.fecha}</p>
+          <p><b>Hora:</b> ${r.hora}</p>
+        </div>
+      `;
+    });
+  }
+}
