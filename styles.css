@@ -1,0 +1,372 @@
+/* Reset básico */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #fafafa; color: #333; }
+
+/* Navbar */
+header {
+  background: #222; color: #fff; padding: 10px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+header .logo { font-weight: bold; font-size: 1.2em; }
+nav button {
+  background: #fff; border: none; margin: 0 5px; padding: 6px 12px;
+  border-radius: 20px; cursor: pointer; transition: background 0.3s;
+}
+nav button:hover { background: #ddd; }
+
+/* Secciones con animación */
+.seccion {
+  display: none;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.4s ease;
+}
+.seccion.activa {
+  display: block;
+  opacity: 1;
+  transform: translateX(0);
+}
+.slide-in-right { transform: translateX(100%); }
+.slide-in-left { transform: translateX(-100%); }
+
+/* Hero pantalla completa */
+.hero {
+  position: relative;
+  background: url("https://portugalglobal.pt/media/qwkiwusw/cafe_r.jpeg?quality=80&rnd=133872865448870000") center/cover no-repeat;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  color: #fff;
+  padding: 0 10%;
+}
+
+.hero-overlay {
+  background: rgba(0,0,0,0.5);
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 600px;
+}
+
+.hero-overlay h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.hero-overlay h1 span {
+  font-weight: bold;
+  font-size: 3rem;
+  display: block;
+}
+
+.hero-overlay p {
+  margin: 15px 0;
+  font-size: 1.1rem;
+}
+
+.hero-overlay button {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.hero-overlay button:hover { background: #ddd; }
+
+/* Cards */
+.card {
+  background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 15px; margin: 10px; text-align: center;
+}
+.card img { width: 100%; border-radius: 10px; }
+
+/* Grid */
+.grid {
+  display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* Formularios */
+.form {
+  display: grid; gap: 10px; max-width: 400px; margin: 10px 0;
+}
+.form input, .form select, .form button {
+  padding: 8px; border: 1px solid #ccc; border-radius: 6px;
+}
+.form button {
+  background: #222; color: #fff; cursor: pointer;
+}
+.form button:hover { background: #444; }
+
+/* Feedback de formularios */
+#msgAlquiler {
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* Modal */
+.modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+}
+.modal.oculto { display: none; }
+.modal-content {
+  background: #fff; padding: 20px; border-radius: 10px; width: 300px;
+}
+
+/* Footer */
+footer {
+  background: #222; color: #ccc; text-align: center; padding: 10px;
+  margin-top: 20px;
+}
+
+#info .card {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+#info .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Carrusel de libros */
+/* Estilos mejorados para el carrusel */
+.carrusel {
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 20px auto;
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-height: 250px;
+}
+
+.carrusel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  gap: 15px;
+}
+
+.carrusel-track .card {
+  min-width: 200px;
+  flex: 0 0 auto;
+  background: #fff;
+  transition: transform 0.3s;
+}
+
+.carrusel-track .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.carrusel button.prev,
+.carrusel button.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255,255,255,0.8);
+  color: #4B2E2B;
+  border: none;
+  font-size: 1.5rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.carrusel button.prev:hover,
+.carrusel button.next:hover {
+  background-color: #fff;
+}
+
+.carrusel button.prev { left: 10px; }
+.carrusel button.next { right: 10px; }
+
+/* Placeholder para imágenes */
+img[src=""] {
+  display: none;
+}
+
+/* Indicador de carga */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading::after {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4B2E2B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Tabs de géneros */
+.filtros {
+  margin: 15px 0;
+  text-align: center;
+}
+.filtros .tab-btn {
+  background: #eee;
+  color: #333;
+  border: none;
+  padding: 10px 18px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+.filtros .tab-btn:hover {
+  background: #ddd;
+}
+.filtros .tab-btn.activo {
+  background: #4B2E2B; /* marrón oscuro */
+  color: #fff;
+}
+
+/* Personalización modal de alquiler */
+#modalAlquiler .modal-content {
+  background: #3e2723; /* marrón oscuro */
+  color: #fff;
+}
+#modalAlquiler input, 
+#modalAlquiler select {
+  border: 1px solid #795548;
+}
+#modalAlquiler button {
+  background: #5d4037;
+  color: #fff;
+}
+#modalAlquiler button:hover {
+  background: #4e342e;
+}
+
+.carrusel button.prev { left: 5px; }
+.carrusel button.next { right: 5px; }
+.carrusel-track .card { background: #fff; color: #222; }
+.carrusel-track .card h4,
+.carrusel-track .card p,
+.carrusel-track .card span { color: #222; }
+#home h2 { color:#4B2E2B ; text-align: center; margin-bottom: 10px; }
+
+/* Estilos para estados de disponibilidad */
+.disponible {
+  color: green;
+  font-weight: bold;
+}
+
+.no-disponible {
+  color: red;
+  font-weight: bold;
+}
+
+/* Reservas pasadas */
+.card.pasada {
+  opacity: 0.7;
+  background-color: #f5f5f5;
+}
+
+/* Mejoras de formularios */
+.form label {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.form input, .form select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Botones de acción */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .hero-overlay h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-overlay h1 span {
+    font-size: 2.5rem;
+  }
+  
+  .form label {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* Estilos para mensajes de error */
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+/* Mejoras para las tarjetas de libros */
+.card img {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* Estilos para el estado de disponibilidad */
+.disponible, .no-disponible {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin-top: 8px;
+}
+
+.disponible {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.no-disponible {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Mejoras de responsive */
+@media (max-width: 768px) {
+  .carrusel {
+    max-width: 100%;
+    padding: 10px;
+  }
+  
+  .carrusel-track .card {
+    min-width: 150px;
+  }
+  
+  .hero-overlay {
+    padding: 20px;
+    max-width: 90%;
+  }
+}
