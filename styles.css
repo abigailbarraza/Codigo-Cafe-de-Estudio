@@ -381,8 +381,10 @@ button:disabled {
   font-size: 2rem;
   color: #ccc;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
+.estrella:hover,
 .estrella.activa {
   color: gold;
 }

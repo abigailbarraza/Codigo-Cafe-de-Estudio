@@ -118,13 +118,8 @@ app.post("/reservas", (req, res) => {
 app.get("/reservas/:email", (req, res) => {
   const email = req.params.email;
   
-  db.all(`
-    SELECT r.* 
-    FROM reservas r 
-    JOIN users u ON r.usuario_id = u.id 
-    WHERE u.email = ?
-    ORDER BY r.created_at DESC
-  `, [email], (err, rows) => {
+  db.all(`SELECT r.* FROM reservas r JOIN users u ON r.usuario_id = u.id WHERE u.email = ?`, 
+    [email], (err, rows) => {
     if (err) {
       return res.status(500).json({ error: "Error al obtener reservas" });
     }
@@ -168,18 +163,14 @@ app.post("/alquileres", (req, res) => {
   });
 });
 
-// server.js - Modificar el endpoint de alquileres
 app.get("/alquileres/:email", (req, res) => {
   const email = req.params.email;
   
-  db.all(`
-    SELECT a.*, l.titulo, l.autor, l.img 
-    FROM alquileres a 
-    JOIN users u ON a.usuario_id = u.id 
-    JOIN libros l ON a.libro_id = l.id
-    WHERE u.email = ?
-    ORDER BY a.fecha_alquiler DESC
-  `, [email], (err, rows) => {
+  db.all(`SELECT a.*, l.titulo, l.autor, l.img FROM alquileres a 
+          JOIN users u ON a.usuario_id = u.id 
+          JOIN libros l ON a.libro_id = l.id
+          WHERE u.email = ? ORDER BY a.fecha_alquiler DESC`, 
+    [email], (err, rows) => {
     if (err) {
       console.error("Error en consulta de alquileres:", err);
       return res.status(500).json({ error: "Error al obtener alquileres" });
@@ -199,12 +190,12 @@ app.get("/alquileres/:email", (req, res) => {
     res.json(alquileresFormateados);
   });
 });
-// ----------------- Calificaciones -----------------
 
+// ----------------- Calificaciones -----------------
 // Obtener calificación del usuario actual para un libro
 app.get("/calificacion/:libroId", (req, res) => {
   const libroId = req.params.libroId;
-  const usuarioEmail = req.query.usuario; // Esperamos que el cliente envíe el email del usuario
+  const usuarioEmail = req.query.usuario;
 
   if (!usuarioEmail) {
     return res.status(400).json({ error: "Se requiere el email del usuario" });
@@ -217,7 +208,8 @@ app.get("/calificacion/:libroId", (req, res) => {
     }
 
     // Buscar la calificación
-    db.get("SELECT * FROM calificaciones WHERE usuario_id = ? AND libro_id = ?", [userRow.id, libroId], (err, calRow) => {
+    db.get("SELECT * FROM calificaciones WHERE usuario_id = ? AND libro_id = ?", 
+      [userRow.id, libroId], (err, calRow) => {
       if (err) {
         return res.status(500).json({ error: "Error en la base de datos" });
       }
@@ -240,9 +232,9 @@ app.post("/calificacion", (req, res) => {
       return res.status(400).json({ error: "Usuario no válido" });
     }
 
-    // Verificar que el usuario ha alquilado el libro (y no lo ha devuelto? o aunque lo haya devuelto puede calificar)
-    // Vamos a permitir calificar incluso si ya lo devolvió, pero debe haberlo alquilado al menos una vez.
-    db.get("SELECT * FROM alquileres WHERE usuario_id = ? AND libro_id = ?", [userRow.id, libroId], (err, alquilerRow) => {
+    // Verificar que el usuario ha alquilado este libro al menos una vez
+    db.get("SELECT * FROM alquileres WHERE usuario_id = ? AND libro_id = ?", 
+      [userRow.id, libroId], (err, alquilerRow) => {
       if (err) {
         return res.status(500).json({ error: "Error en la base de datos" });
       }
@@ -254,6 +246,7 @@ app.post("/calificacion", (req, res) => {
       db.run("INSERT OR REPLACE INTO calificaciones (usuario_id, libro_id, calificacion, comentario) VALUES (?, ?, ?, ?)",
         [userRow.id, libroId, calificacion, comentario], function(err) {
         if (err) {
+          console.error("Error al guardar calificación:", err);
           return res.status(500).json({ error: "Error al guardar la calificación" });
         }
         res.json({ success: true, calificacionId: this.lastID });
@@ -261,8 +254,6 @@ app.post("/calificacion", (req, res) => {
     });
   });
 });
-
-
 
 // Devolver un libro
 app.post("/devolver/:id", (req, res) => {

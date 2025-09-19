@@ -1,7 +1,8 @@
 // app.js
 const API_URL = "http://localhost:3000";
 let session = JSON.parse(localStorage.getItem("session")) || null;
-
+let libroSeleccionado = null;
+let calificacionSeleccionada = 0;
 
 // ----------------- Navegación -----------------
 let seccionActual = "home";
@@ -19,11 +20,12 @@ function mostrarSeccion(id) {
     renderHistorial();
   } else if (id === "libros") {
     renderLibros();
-    renderMisAlquileres(); // Para la sección de libros
+    renderMisAlquileres();
   } else if (id === "reservas") {
-    renderMisReservas(); // Para la sección de reservas
+    renderMisReservas();
   }
 }
+
 // ----------------- Auth -----------------
 function renderAuthButtons() {
   const div = document.getElementById("authButtons");
@@ -39,7 +41,6 @@ function renderAuthButtons() {
 function abrirModal(tipo) { 
   document.getElementById("modalAuth").classList.remove("oculto"); 
   document.getElementById("tituloModal").textContent = tipo === "login" ? "Iniciar sesión" : "Registrarse"; 
-  // Limpiar formulario
   document.getElementById("formAuth").reset();
 }
 
@@ -85,15 +86,14 @@ document.getElementById("formAuth").addEventListener("submit", async e => {
     alert("Error de conexión");
   }
 });
+
 // ----------------- Libros -----------------
 async function renderLibros(filtroGenero = null) {
   try {
     const res = await fetch(`${API_URL}/libros`);
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+    
     let lista = await res.json();
-
     if (filtroGenero && filtroGenero !== "todos") {
       lista = lista.filter(l => l.genero === filtroGenero);
     }
@@ -110,8 +110,7 @@ async function renderLibros(filtroGenero = null) {
     }).join("") : "<p>No hay libros disponibles en este momento.</p>";
   } catch (error) {
     console.error("Error al cargar libros:", error);
-    const div = document.getElementById("listaLibros");
-    div.innerHTML = "<p>Error al cargar los libros. Intenta nuevamente.</p>";
+    document.getElementById("listaLibros").innerHTML = "<p>Error al cargar los libros. Intenta nuevamente.</p>";
   }
 }
 
@@ -127,9 +126,36 @@ async function verDetalleLibro(id) {
     document.getElementById("detalleSinopsis").textContent = libro.sinopsis;
     
     const disponible = libro.copias > 0;
-    document.getElementById("detalleAcciones").innerHTML = disponible ? 
+    let botonAlquilar = disponible ? 
       `<button onclick="prepararAlquiler(${libro.id})">Alquilar</button>` :
       `<button disabled>No disponible</button>`;
+    
+    if (session) {
+      try {
+        const resCalificacion = await fetch(`${API_URL}/calificacion/${libro.id}?usuario=${session.email}`);
+        const calificacion = await resCalificacion.json();
+        
+        let botonCalificar = '';
+        if (calificacion && calificacion.calificacion) {
+          botonCalificar = `<div>Tu calificación: ${calificacion.calificacion} estrellas</div>`;
+        } else {
+          const resAlquiler = await fetch(`${API_URL}/alquileres/${session.email}`);
+          const alquileres = await resAlquiler.json();
+          const haAlquilado = alquileres.some(a => a.libro_id == libro.id);
+          
+          if (haAlquilado) {
+            botonCalificar = `<button onclick="abrirModalCalificacion(${libro.id})">Mi opinión</button>`;
+          }
+        }
+        
+        document.getElementById("detalleAcciones").innerHTML = botonAlquilar + botonCalificar;
+      } catch (error) {
+        console.error("Error al verificar calificación:", error);
+        document.getElementById("detalleAcciones").innerHTML = botonAlquilar;
+      }
+    } else {
+      document.getElementById("detalleAcciones").innerHTML = botonAlquilar;
+    }
     
     document.getElementById("modalLibro").classList.remove("oculto");
   } catch (error) {
@@ -179,7 +205,6 @@ document.getElementById("formAlquiler").addEventListener("submit", async e => {
       setTimeout(() => {
         cerrarModalAlquiler();
         document.getElementById("msgAlquiler").innerText = "";
-        // Actualizar lista de libros
         renderLibros();
       }, 1500);
     } else {
@@ -212,135 +237,7 @@ async function renderMisAlquileres() {
   }
 }
 
-// server.js - Mejorar el endpoint de devolución
-app.post("/devolver/:id", (req, res) => {
-  const alquilerId = req.params.id;
-  
-  db.get("SELECT libro_id FROM alquileres WHERE id = ?", [alquilerId], (err, row) => {
-    if (err) {
-      console.error("Error al buscar alquiler:", err);
-      return res.status(500).json({ error: "Error en la base de datos" });
-    }
-    
-    if (!row) {
-      return res.status(404).json({ error: "Alquiler no encontrado" });
-    }
-    
-    // Marcar como devuelto
-    db.run("UPDATE alquileres SET devuelto = 1 WHERE id = ?", [alquilerId], function(err) {
-      if (err) {
-        console.error("Error al actualizar alquiler:", err);
-        return res.status(500).json({ error: "Error al registrar devolución" });
-      }
-      
-      // Aumentar el número de copias disponibles
-      db.run("UPDATE libros SET copias = copias + 1 WHERE id = ?", [row.libro_id], function(err) {
-        if (err) {
-          console.error("Error al actualizar copias:", err);
-          // Aunque falle la actualización de copias, la devolución se registró
-          return res.json({ success: true, warning: "Devolución registrada pero error al actualizar inventario" });
-        }
-        
-        res.json({ success: true });
-      });
-    });
-  });
-});
-
-// app.js - Mejorar la función renderMisAlquileres
-async function renderMisAlquileres(elementId = 'misAlquileres') {
-  const div = document.getElementById(elementId);
-  if (!div) return;
-  if (!session) {
-    div.innerHTML = "<p>Inicia sesión para ver tus alquileres</p>";
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/alquileres/${session.email}`);
-    
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
-    }
-    
-    const alquileres = await res.json();
-    
-    // Verificar si la respuesta es un array
-    if (!Array.isArray(alquileres)) {
-      throw new Error("Formato de respuesta inválido");
-    }
-    
-    const alquileresActivos = alquileres.filter(a => !a.devuelto);
-    
-    div.innerHTML = "<h3>Mis alquileres activos</h3>" + 
-      (alquileresActivos.length > 0 ? alquileresActivos.map(a => `
-        <div class="card">
-          <h4>${a.titulo}</h4>
-          <p>Autor: ${a.autor}</p>
-          <p>Fecha de devolución: ${a.fecha_devolucion}</p>
-          <button onclick="devolverLibro(${a.id})">Devolver</button>
-        </div>
-      `).join("") : "<p>No tienes alquileres activos.</p>");
-  } catch (error) {
-    console.error("Error al cargar alquileres:", error);
-    div.innerHTML = "<p class='error-message'>Error al cargar los alquileres. Intenta nuevamente.</p>";
-  }
-}
-
-
-
-// Variable global para la calificación seleccionada
-let calificacionSeleccionada = 0;
-
-// En verDetalleLibro, después de cargar los detalles, verificar si el usuario puede calificar
-async function verDetalleLibro(id) {
-  try {
-    const res = await fetch(`${API_URL}/libros/${id}`);
-    const libro = await res.json();
-    
-    document.getElementById("detalleTitulo").textContent = libro.titulo;
-    document.getElementById("detalleImg").src = libro.img;
-    document.getElementById("detalleAutor").textContent = "Autor: " + libro.autor;
-    document.getElementById("detalleGenero").textContent = "Género: " + libro.genero;
-    document.getElementById("detalleSinopsis").textContent = libro.sinopsis;
-    
-    const disponible = libro.copias > 0;
-    let botonAlquilar = disponible ? 
-      `<button onclick="prepararAlquiler(${libro.id})">Alquilar</button>` :
-      `<button disabled>No disponible</button>`;
-    
-    // Verificar si el usuario está logueado
-    if (session) {
-      // Verificar si el usuario ha alquilado este libro (aunque lo haya devuelto) y si ya lo calificó
-      const resCalificacion = await fetch(`${API_URL}/calificacion/${libro.id}?usuario=${session.email}`);
-      const calificacion = await resCalificacion.json();
-      
-      let botonCalificar = '';
-      if (calificacion.calificacion) {
-        botonCalificar = `<div>Tu calificación: ${calificacion.calificacion} estrellas</div>`;
-      } else {
-        // Verificar si el usuario ha alquilado este libro al menos una vez
-        const resAlquiler = await fetch(`${API_URL}/alquileres/${session.email}`);
-        const alquileres = await resAlquiler.json();
-        const haAlquilado = alquileres.some(a => a.libro_id == libro.id);
-        
-        if (haAlquilado) {
-          botonCalificar = `<button onclick="abrirModalCalificacion(${libro.id})">Mi opinión</button>`;
-        }
-      }
-      
-      document.getElementById("detalleAcciones").innerHTML = botonAlquilar + botonCalificar;
-    } else {
-      document.getElementById("detalleAcciones").innerHTML = botonAlquilar;
-    }
-    
-    document.getElementById("modalLibro").classList.remove("oculto");
-  } catch (error) {
-    alert("Error al cargar detalles del libro");
-  }
-}
-
-// Abrir modal de calificación
+// ----------------- Calificaciones -----------------
 function abrirModalCalificacion(libroId) {
   document.getElementById("calificacionLibroId").value = libroId;
   document.getElementById("comentarioCalificacion").value = '';
@@ -349,31 +246,36 @@ function abrirModalCalificacion(libroId) {
   document.getElementById("modalCalificacion").classList.remove("oculto");
 }
 
-// Cerrar modal de calificación
 function cerrarModalCalificacion() {
   document.getElementById("modalCalificacion").classList.add("oculto");
 }
 
-// Resetear estrellas
 function resetEstrellas() {
   const estrellas = document.querySelectorAll('.estrella');
   estrellas.forEach(star => star.classList.remove('activa'));
+  document.getElementById("textoCalificacion").textContent = "Selecciona una calificación";
 }
 
-// Manejar clic en estrellas
-document.querySelectorAll('.estrella').forEach(star => {
-  star.addEventListener('click', () => {
-    const value = parseInt(star.getAttribute('data-value'));
-    calificacionSeleccionada = value;
-    resetEstrellas();
-    // Activar estrellas hasta la seleccionada
-    document.querySelectorAll('.estrella').forEach(s => {
-      if (parseInt(s.getAttribute('data-value')) <= value) {
-        s.classList.add('activa');
-      }
+// Inicializar eventos de estrellas
+function inicializarEstrellas() {
+  document.querySelectorAll('.estrella').forEach(star => {
+    star.addEventListener('click', () => {
+      const value = parseInt(star.getAttribute('data-value'));
+      calificacionSeleccionada = value;
+      resetEstrellas();
+      
+      document.querySelectorAll('.estrella').forEach(s => {
+        if (parseInt(s.getAttribute('data-value')) <= value) {
+          s.classList.add('activa');
+        }
+      });
+      
+      const ratings = ["", "Muy malo", "Regular", "Bueno", "Muy bueno", "Excelente"];
+      document.getElementById("textoCalificacion").textContent = 
+        `${ratings[value]} (${value} estrellas)`;
     });
   });
-});
+}
 
 // Enviar calificación
 document.getElementById("formCalificacion").addEventListener("submit", async e => {
@@ -408,7 +310,6 @@ document.getElementById("formCalificacion").addEventListener("submit", async e =
     if (data.success) {
       alert("✅ Calificación enviada");
       cerrarModalCalificacion();
-      // Recargar el detalle para mostrar la calificación
       verDetalleLibro(libroId);
     } else {
       alert(data.error || "Error al enviar la calificación");
@@ -417,7 +318,6 @@ document.getElementById("formCalificacion").addEventListener("submit", async e =
     alert("Error de conexión");
   }
 });
-
 
 // ----------------- Reservas -----------------
 document.getElementById("formReserva").addEventListener("submit", async e => {
@@ -451,7 +351,6 @@ document.getElementById("formReserva").addEventListener("submit", async e => {
   }
 });
 
-// Reservas - ahora con parámetro opcional
 async function renderMisReservas(elementId = 'misReservas') {
   const div = document.getElementById(elementId);
   if (!div || !session) return;
@@ -492,18 +391,15 @@ async function renderHistorial() {
   }
 }
 
-// Función específica para reservas en el historial
 async function renderHistorialReservas() {
   const div = document.getElementById("historialReservas");
   if (!div || !session) return;
 
   try {
     const res = await fetch(`${API_URL}/reservas/${session.email}`);
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
-    }
-    const reservas = await res.json();
+    if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
     
+    const reservas = await res.json();
     const hoy = new Date().toISOString().split('T')[0];
     
     div.innerHTML = "<h3>Historial de Reservas</h3>" + 
@@ -521,16 +417,14 @@ async function renderHistorialReservas() {
   }
 }
 
-// Función específica para alquileres en el historial
 async function renderHistorialAlquileres() {
   const div = document.getElementById("historialLibros");
   if (!div || !session) return;
 
   try {
     const res = await fetch(`${API_URL}/alquileres/${session.email}`);
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+    
     const alquileres = await res.json();
     
     div.innerHTML = "<h3>Historial de Alquileres</h3>" + 
@@ -549,38 +443,32 @@ async function renderHistorialAlquileres() {
     div.innerHTML = "<p>Error al cargar el historial de alquileres. Intenta nuevamente.</p>";
   }
 }
-// ----------------- Carrusel -----------------
+
 // ----------------- Carrusel -----------------
 async function renderTopLibros() {
   try {
     const res = await fetch(`${API_URL}/libros`);
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+    
     let lista = await res.json();
     const recomendados = [...lista].sort(() => 0.5 - Math.random()).slice(0, 4);
 
     const div = document.getElementById("carruselLibros");
-    div.innerHTML = recomendados.map(b => {
-      // Añadir manejo de errores para imágenes
-      return `<div class="card">
-                <img src="${b.img}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
-                <h4>${b.titulo}</h4>
-                <p>${b.autor}</p>
-              </div>`;
-    }).join("");
+    div.innerHTML = recomendados.map(b => `
+      <div class="card">
+        <img src="${b.img}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
+        <h4>${b.titulo}</h4>
+        <p>${b.autor}</p>
+      </div>
+    `).join("");
     
-    // Recalcular el ancho de los elementos después de cargar las imágenes
     setTimeout(() => {
       itemWidth = 0;
-      if (recomendados.length > 0) {
-        moverCarrusel(0); // Reposicionar el carrusel
-      }
+      if (recomendados.length > 0) moverCarrusel(0);
     }, 100);
   } catch (error) {
     console.error("Error al cargar libros del carrusel:", error);
     
-    // Contenido de respaldo para el carrusel
     const div = document.getElementById("carruselLibros");
     div.innerHTML = `
       <div class="card"><img src="https://via.placeholder.com/150x200?text=Libro+1" alt="Libro 1"><h4>Cien años de soledad</h4><p>Gabriel García Márquez</p></div>
@@ -599,44 +487,33 @@ function moverCarrusel(dir) {
     return;
   }
   
-  // Calcular el ancho del elemento si no se ha calculado
   if (itemWidth === 0) {
     itemWidth = track.children[0].offsetWidth + 20;
   }
   
   const total = track.children.length;
-  const visible = Math.min(4, total); // Máximo 4 elementos visibles
+  const visible = Math.min(4, total);
   const max = -(itemWidth * (total - visible));
   
   posCarrusel += dir * itemWidth;
   
-  // Limitar el movimiento
   if (posCarrusel > 0) posCarrusel = 0;
   if (posCarrusel < max) posCarrusel = max;
   
   track.style.transform = `translateX(${posCarrusel}px)`;
 }
 
-// app.js - Añadir función para devolver libros
 async function devolverLibro(alquilerId) {
   if (!session) return alert("Debes iniciar sesión");
 
   try {
-    const res = await fetch(`${API_URL}/devolver/${alquilerId}`, {
-      method: "POST"
-    });
-    
+    const res = await fetch(`${API_URL}/devolver/${alquilerId}`, { method: "POST" });
     const data = await res.json();
     
     if (data.success) {
       alert("✅ Libro devuelto con éxito");
-      // Actualizar la lista de alquileres
       renderMisAlquileres();
-      // Si estamos en la sección de historial, actualizarla también
-      if (seccionActual === "historial") {
-        renderHistorial();
-      }
-      // Actualizar la lista de libros disponibles
+      if (seccionActual === "historial") renderHistorial();
       renderLibros();
     } else {
       alert(data.error || "Error al devolver el libro");
@@ -646,38 +523,24 @@ async function devolverLibro(alquilerId) {
   }
 }
 
-
-
-
-
-
-
-// ----------------- Init -----------------
 // ----------------- Init -----------------
 window.onload = async () => {
   console.log("Iniciando aplicación...");
   
   try {
     renderAuthButtons();
+    inicializarEstrellas(); // Inicializar eventos de estrellas
 
-    // Configurar fecha mínima para reservas (hoy)
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById("fechaReserva").min = hoy;
     document.getElementById("fechaDevolucion").min = hoy;
     
-    // Cargar datos iniciales
-    await Promise.all([
-      renderTopLibros(),
-      renderLibros()
-    ]);
+    await Promise.all([renderTopLibros(), renderLibros()]);
     
     console.log("Datos cargados correctamente");
     
-    // Iniciar carrusel automático
     setInterval(() => { 
-      if (seccionActual === "home") {
-        moverCarrusel(1); 
-      }
+      if (seccionActual === "home") moverCarrusel(1); 
     }, 4000);
   } catch (error) {
     console.error("Error en la inicialización:", error);
