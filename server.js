@@ -168,6 +168,7 @@ app.post("/alquileres", (req, res) => {
   });
 });
 
+// server.js - Modificar el endpoint de alquileres
 app.get("/alquileres/:email", (req, res) => {
   const email = req.params.email;
   
@@ -180,11 +181,88 @@ app.get("/alquileres/:email", (req, res) => {
     ORDER BY a.fecha_alquiler DESC
   `, [email], (err, rows) => {
     if (err) {
+      console.error("Error en consulta de alquileres:", err);
       return res.status(500).json({ error: "Error al obtener alquileres" });
     }
-    res.json(rows);
+    
+    // Asegurar que todos los campos necesarios estén presentes
+    const alquileresFormateados = rows.map(row => ({
+      id: row.id,
+      libro_id: row.libro_id,
+      titulo: row.titulo || "Sin título",
+      autor: row.autor || "Autor desconocido",
+      fecha_alquiler: row.fecha_alquiler,
+      fecha_devolucion: row.fecha_devolucion,
+      devuelto: row.devuelto === 1 ? true : false
+    }));
+    
+    res.json(alquileresFormateados);
   });
 });
+// ----------------- Calificaciones -----------------
+
+// Obtener calificación del usuario actual para un libro
+app.get("/calificacion/:libroId", (req, res) => {
+  const libroId = req.params.libroId;
+  const usuarioEmail = req.query.usuario; // Esperamos que el cliente envíe el email del usuario
+
+  if (!usuarioEmail) {
+    return res.status(400).json({ error: "Se requiere el email del usuario" });
+  }
+
+  // Obtener el ID del usuario a partir del email
+  db.get("SELECT id FROM users WHERE email = ?", [usuarioEmail], (err, userRow) => {
+    if (err || !userRow) {
+      return res.status(400).json({ error: "Usuario no válido" });
+    }
+
+    // Buscar la calificación
+    db.get("SELECT * FROM calificaciones WHERE usuario_id = ? AND libro_id = ?", [userRow.id, libroId], (err, calRow) => {
+      if (err) {
+        return res.status(500).json({ error: "Error en la base de datos" });
+      }
+      res.json(calRow || {}); // Si no existe, devuelve un objeto vacío
+    });
+  });
+});
+
+// Guardar calificación
+app.post("/calificacion", (req, res) => {
+  const { libroId, usuario, calificacion, comentario } = req.body;
+
+  if (!libroId || !usuario || !calificacion) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  // Obtener el ID del usuario a partir del email
+  db.get("SELECT id FROM users WHERE email = ?", [usuario], (err, userRow) => {
+    if (err || !userRow) {
+      return res.status(400).json({ error: "Usuario no válido" });
+    }
+
+    // Verificar que el usuario ha alquilado el libro (y no lo ha devuelto? o aunque lo haya devuelto puede calificar)
+    // Vamos a permitir calificar incluso si ya lo devolvió, pero debe haberlo alquilado al menos una vez.
+    db.get("SELECT * FROM alquileres WHERE usuario_id = ? AND libro_id = ?", [userRow.id, libroId], (err, alquilerRow) => {
+      if (err) {
+        return res.status(500).json({ error: "Error en la base de datos" });
+      }
+      if (!alquilerRow) {
+        return res.status(400).json({ error: "No puedes calificar un libro que no has alquilado" });
+      }
+
+      // Insertar o actualizar la calificación (usamos INSERT OR REPLACE porque tenemos UNIQUE constraint)
+      db.run("INSERT OR REPLACE INTO calificaciones (usuario_id, libro_id, calificacion, comentario) VALUES (?, ?, ?, ?)",
+        [userRow.id, libroId, calificacion, comentario], function(err) {
+        if (err) {
+          return res.status(500).json({ error: "Error al guardar la calificación" });
+        }
+        res.json({ success: true, calificacionId: this.lastID });
+      });
+    });
+  });
+});
+
+
 
 // Devolver un libro
 app.post("/devolver/:id", (req, res) => {

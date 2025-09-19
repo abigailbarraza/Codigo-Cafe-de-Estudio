@@ -370,3 +370,19 @@ button:disabled {
     max-width: 90%;
   }
 }
+
+.estrellas {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.estrella {
+  font-size: 2rem;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.estrella.activa {
+  color: gold;
+}

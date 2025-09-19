@@ -68,7 +68,33 @@ function initDatabase() {
       }
     });
   });
+
+// Tabla de calificaciones
+db.run(`CREATE TABLE IF NOT EXISTS calificaciones (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  usuario_id INTEGER NOT NULL,
+  libro_id INTEGER NOT NULL,
+  calificacion INTEGER NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
+  comentario TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(usuario_id) REFERENCES users(id),
+  FOREIGN KEY(libro_id) REFERENCES libros(id),
+  UNIQUE(usuario_id, libro_id)
+)`);
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
 
 // Insertar libros iniciales
 function insertarLibrosIniciales() {

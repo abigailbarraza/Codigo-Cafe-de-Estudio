@@ -212,28 +212,212 @@ async function renderMisAlquileres() {
   }
 }
 
-// Alquileres - ahora con parámetro opcional
+// server.js - Mejorar el endpoint de devolución
+app.post("/devolver/:id", (req, res) => {
+  const alquilerId = req.params.id;
+  
+  db.get("SELECT libro_id FROM alquileres WHERE id = ?", [alquilerId], (err, row) => {
+    if (err) {
+      console.error("Error al buscar alquiler:", err);
+      return res.status(500).json({ error: "Error en la base de datos" });
+    }
+    
+    if (!row) {
+      return res.status(404).json({ error: "Alquiler no encontrado" });
+    }
+    
+    // Marcar como devuelto
+    db.run("UPDATE alquileres SET devuelto = 1 WHERE id = ?", [alquilerId], function(err) {
+      if (err) {
+        console.error("Error al actualizar alquiler:", err);
+        return res.status(500).json({ error: "Error al registrar devolución" });
+      }
+      
+      // Aumentar el número de copias disponibles
+      db.run("UPDATE libros SET copias = copias + 1 WHERE id = ?", [row.libro_id], function(err) {
+        if (err) {
+          console.error("Error al actualizar copias:", err);
+          // Aunque falle la actualización de copias, la devolución se registró
+          return res.json({ success: true, warning: "Devolución registrada pero error al actualizar inventario" });
+        }
+        
+        res.json({ success: true });
+      });
+    });
+  });
+});
+
+// app.js - Mejorar la función renderMisAlquileres
 async function renderMisAlquileres(elementId = 'misAlquileres') {
   const div = document.getElementById(elementId);
-  if (!div || !session) return;
+  if (!div) return;
+  if (!session) {
+    div.innerHTML = "<p>Inicia sesión para ver tus alquileres</p>";
+    return;
+  }
 
   try {
     const res = await fetch(`${API_URL}/alquileres/${session.email}`);
+    
+    if (!res.ok) {
+      throw new Error(`Error HTTP: ${res.status}`);
+    }
+    
     const alquileres = await res.json();
     
+    // Verificar si la respuesta es un array
+    if (!Array.isArray(alquileres)) {
+      throw new Error("Formato de respuesta inválido");
+    }
+    
+    const alquileresActivos = alquileres.filter(a => !a.devuelto);
+    
     div.innerHTML = "<h3>Mis alquileres activos</h3>" + 
-      (alquileres.filter(a => !a.devuelto).map(a => `
+      (alquileresActivos.length > 0 ? alquileresActivos.map(a => `
         <div class="card">
           <h4>${a.titulo}</h4>
           <p>Autor: ${a.autor}</p>
           <p>Fecha de devolución: ${a.fecha_devolucion}</p>
           <button onclick="devolverLibro(${a.id})">Devolver</button>
         </div>
-      `).join("") || "<p>No tienes alquileres activos.</p>");
+      `).join("") : "<p>No tienes alquileres activos.</p>");
   } catch (error) {
     console.error("Error al cargar alquileres:", error);
+    div.innerHTML = "<p class='error-message'>Error al cargar los alquileres. Intenta nuevamente.</p>";
   }
 }
+
+
+
+// Variable global para la calificación seleccionada
+let calificacionSeleccionada = 0;
+
+// En verDetalleLibro, después de cargar los detalles, verificar si el usuario puede calificar
+async function verDetalleLibro(id) {
+  try {
+    const res = await fetch(`${API_URL}/libros/${id}`);
+    const libro = await res.json();
+    
+    document.getElementById("detalleTitulo").textContent = libro.titulo;
+    document.getElementById("detalleImg").src = libro.img;
+    document.getElementById("detalleAutor").textContent = "Autor: " + libro.autor;
+    document.getElementById("detalleGenero").textContent = "Género: " + libro.genero;
+    document.getElementById("detalleSinopsis").textContent = libro.sinopsis;
+    
+    const disponible = libro.copias > 0;
+    let botonAlquilar = disponible ? 
+      `<button onclick="prepararAlquiler(${libro.id})">Alquilar</button>` :
+      `<button disabled>No disponible</button>`;
+    
+    // Verificar si el usuario está logueado
+    if (session) {
+      // Verificar si el usuario ha alquilado este libro (aunque lo haya devuelto) y si ya lo calificó
+      const resCalificacion = await fetch(`${API_URL}/calificacion/${libro.id}?usuario=${session.email}`);
+      const calificacion = await resCalificacion.json();
+      
+      let botonCalificar = '';
+      if (calificacion.calificacion) {
+        botonCalificar = `<div>Tu calificación: ${calificacion.calificacion} estrellas</div>`;
+      } else {
+        // Verificar si el usuario ha alquilado este libro al menos una vez
+        const resAlquiler = await fetch(`${API_URL}/alquileres/${session.email}`);
+        const alquileres = await resAlquiler.json();
+        const haAlquilado = alquileres.some(a => a.libro_id == libro.id);
+        
+        if (haAlquilado) {
+          botonCalificar = `<button onclick="abrirModalCalificacion(${libro.id})">Mi opinión</button>`;
+        }
+      }
+      
+      document.getElementById("detalleAcciones").innerHTML = botonAlquilar + botonCalificar;
+    } else {
+      document.getElementById("detalleAcciones").innerHTML = botonAlquilar;
+    }
+    
+    document.getElementById("modalLibro").classList.remove("oculto");
+  } catch (error) {
+    alert("Error al cargar detalles del libro");
+  }
+}
+
+// Abrir modal de calificación
+function abrirModalCalificacion(libroId) {
+  document.getElementById("calificacionLibroId").value = libroId;
+  document.getElementById("comentarioCalificacion").value = '';
+  calificacionSeleccionada = 0;
+  resetEstrellas();
+  document.getElementById("modalCalificacion").classList.remove("oculto");
+}
+
+// Cerrar modal de calificación
+function cerrarModalCalificacion() {
+  document.getElementById("modalCalificacion").classList.add("oculto");
+}
+
+// Resetear estrellas
+function resetEstrellas() {
+  const estrellas = document.querySelectorAll('.estrella');
+  estrellas.forEach(star => star.classList.remove('activa'));
+}
+
+// Manejar clic en estrellas
+document.querySelectorAll('.estrella').forEach(star => {
+  star.addEventListener('click', () => {
+    const value = parseInt(star.getAttribute('data-value'));
+    calificacionSeleccionada = value;
+    resetEstrellas();
+    // Activar estrellas hasta la seleccionada
+    document.querySelectorAll('.estrella').forEach(s => {
+      if (parseInt(s.getAttribute('data-value')) <= value) {
+        s.classList.add('activa');
+      }
+    });
+  });
+});
+
+// Enviar calificación
+document.getElementById("formCalificacion").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!session) {
+    alert("Debes iniciar sesión");
+    return;
+  }
+  
+  const libroId = document.getElementById("calificacionLibroId").value;
+  const comentario = document.getElementById("comentarioCalificacion").value;
+  
+  if (calificacionSeleccionada === 0) {
+    alert("Selecciona una calificación");
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/calificacion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        libroId,
+        usuario: session.email,
+        calificacion: calificacionSeleccionada,
+        comentario
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      alert("✅ Calificación enviada");
+      cerrarModalCalificacion();
+      // Recargar el detalle para mostrar la calificación
+      verDetalleLibro(libroId);
+    } else {
+      alert(data.error || "Error al enviar la calificación");
+    }
+  } catch (error) {
+    alert("Error de conexión");
+  }
+});
+
 
 // ----------------- Reservas -----------------
 document.getElementById("formReserva").addEventListener("submit", async e => {
@@ -432,6 +616,41 @@ function moverCarrusel(dir) {
   
   track.style.transform = `translateX(${posCarrusel}px)`;
 }
+
+// app.js - Añadir función para devolver libros
+async function devolverLibro(alquilerId) {
+  if (!session) return alert("Debes iniciar sesión");
+
+  try {
+    const res = await fetch(`${API_URL}/devolver/${alquilerId}`, {
+      method: "POST"
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      alert("✅ Libro devuelto con éxito");
+      // Actualizar la lista de alquileres
+      renderMisAlquileres();
+      // Si estamos en la sección de historial, actualizarla también
+      if (seccionActual === "historial") {
+        renderHistorial();
+      }
+      // Actualizar la lista de libros disponibles
+      renderLibros();
+    } else {
+      alert(data.error || "Error al devolver el libro");
+    }
+  } catch (error) {
+    alert("Error de conexión");
+  }
+}
+
+
+
+
+
+
 
 // ----------------- Init -----------------
 // ----------------- Init -----------------
