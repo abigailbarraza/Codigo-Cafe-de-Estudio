@@ -575,3 +575,33 @@ button:disabled {
 .tooltip:hover::after {
   opacity: 1;
 }
+
+/* Reseñas */
+.reseña-card {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.reseña-card strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.reseña-card span {
+  color: #f39c12;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.reseña-card p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.reseña-card small {
+  font-size: 12px;
+  color: #666;
+}
