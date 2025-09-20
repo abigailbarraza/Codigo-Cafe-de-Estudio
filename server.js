@@ -105,13 +105,71 @@ app.post("/reservas", (req, res) => {
       return res.status(400).json({ error: "Usuario no válido" });
     }
     
-    db.run("INSERT INTO reservas (usuario_id, tipo, personas, fecha, hora) VALUES (?, ?, ?, ?, ?)", 
-      [userRow.id, tipo, personas, fecha, hora], function(err) {
+    // **NUEVA VALIDACIÓN: Verificar si ya existe una reserva para esa fecha, hora y tipo**
+    db.get("SELECT * FROM reservas WHERE tipo = ? AND fecha = ? AND hora = ?", 
+      [tipo, fecha, hora], (err, reservaExistente) => {
       if (err) {
-        return res.status(500).json({ error: "Error al crear reserva" });
+        return res.status(500).json({ error: "Error al verificar disponibilidad" });
       }
-      res.json({ success: true, reservaId: this.lastID });
+      
+      // Si ya existe una reserva para ese tipo, fecha y hora
+      if (reservaExistente) {
+        const tipoTexto = tipo === 'mesa' ? 'mesa' : 'computadora';
+        return res.status(400).json({ 
+          error: `Ya hay una reserva para ${tipoTexto} el ${fecha} a las ${hora}. Por favor, selecciona otra fecha u horario.` 
+        });
+      }
+      
+      // Si no hay conflicto, crear la reserva
+      db.run("INSERT INTO reservas (usuario_id, tipo, personas, fecha, hora) VALUES (?, ?, ?, ?, ?)", 
+        [userRow.id, tipo, personas, fecha, hora], function(err) {
+        if (err) {
+          return res.status(500).json({ error: "Error al crear reserva" });
+        }
+        res.json({ success: true, reservaId: this.lastID });
+      });
     });
+  });
+});
+
+// **NUEVO ENDPOINT: Verificar disponibilidad antes de mostrar el formulario**
+app.get("/verificar-disponibilidad", (req, res) => {
+  const { tipo, fecha, hora } = req.query;
+  
+  if (!tipo || !fecha || !hora) {
+    return res.status(400).json({ error: "Faltan parámetros requeridos" });
+  }
+  
+  db.get("SELECT * FROM reservas WHERE tipo = ? AND fecha = ? AND hora = ?", 
+    [tipo, fecha, hora], (err, reservaExistente) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al verificar disponibilidad" });
+    }
+    
+    res.json({ 
+      disponible: !reservaExistente,
+      mensaje: reservaExistente ? 
+        `No disponible: Ya hay una reserva para ${tipo === 'mesa' ? 'mesa' : 'computadora'} en esta fecha y hora` :
+        'Disponible'
+    });
+  });
+});
+
+// **NUEVO ENDPOINT: Obtener horarios ocupados para una fecha específica**
+app.get("/horarios-ocupados/:fecha", (req, res) => {
+  const fecha = req.params.fecha;
+  
+  db.all("SELECT tipo, hora FROM reservas WHERE fecha = ?", [fecha], (err, reservas) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener horarios ocupados" });
+    }
+    
+    const horariosOcupados = {
+      mesa: reservas.filter(r => r.tipo === 'mesa').map(r => r.hora),
+      pc: reservas.filter(r => r.tipo === 'pc').map(r => r.hora)
+    };
+    
+    res.json(horariosOcupados);
   });
 });
 

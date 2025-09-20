@@ -77,10 +77,18 @@
   <div id="listaMenu" class="grid"></div>
   </section>
 
-
-  <!-- Reservas -->
+  <!-- Reservas CON VALIDACIÓN -->
   <section class="seccion" id="reservas">
     <h2>Reservas</h2>
+    <div class="reserva-info">
+      <p><strong>ℹ️ Información importante:</strong></p>
+      <ul>
+        <li>Solo se puede reservar una mesa o computadora por horario</li>
+        <li>Las reservas se confirman inmediatamente si están disponibles</li>
+        <li>Verifica la disponibilidad antes de confirmar</li>
+      </ul>
+    </div>
+    
     <form id="formReserva" class="form">
       <label>Tipo:
         <select id="tipoReserva">
@@ -91,6 +99,11 @@
       <label>Personas: <input type="number" id="personas" min="1" value="1"></label>
       <label>Fecha: <input type="date" id="fechaReserva"></label>
       <label>Hora: <input type="time" id="horaReserva"></label>
+      
+      <!-- Contenedor para mostrar disponibilidad -->
+      <div id="infoHorarios"></div>
+      <!-- Aquí se mostrará el mensaje de disponibilidad dinámicamente -->
+      
       <button type="submit">Reservar</button>
     </form>
     <div id="misReservas"></div>

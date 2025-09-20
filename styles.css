@@ -20,6 +20,7 @@ nav button:hover { background: #ddd; }
   opacity: 0;
   transform: translateX(100%);
   transition: all 0.4s ease;
+  padding: 20px;
 }
 .seccion.activa {
   display: block;
@@ -107,14 +108,71 @@ nav button:hover { background: #ddd; }
   margin-top: 8px;
 }
 
+/* **NUEVOS ESTILOS PARA VALIDACIÓN DE RESERVAS** */
+.reserva-info {
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #2196f3;
+}
+
+.reserva-info ul {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.reserva-info li {
+  margin-bottom: 5px;
+}
+
+/* Mensaje de disponibilidad */
+#mensajeDisponibilidad {
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+  display: none;
+}
+
+.disponibilidad-ok {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.disponibilidad-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Información de horarios ocupados */
+#infoHorarios {
+  background: #fff3cd;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  border: 1px solid #ffeaa7;
+  display: none;
+}
+
+#infoHorarios.visible {
+  display: block;
+}
+
 /* Modal */
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
 }
 .modal.oculto { display: none; }
 .modal-content {
   background: #fff; padding: 20px; border-radius: 10px; width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 /* Footer */
@@ -301,6 +359,67 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* **ESTILOS ESPECÍFICOS PARA RESERVAS CON CONFLICTO** */
+.reserva-conflicto {
+  background: #ffebee;
+  border: 2px solid #f44336;
+  color: #c62828;
+}
+
+.reserva-disponible {
+  background: #e8f5e9;
+  border: 2px solid #4caf50;
+  color: #2e7d32;
+}
+
+/* Animaciones para feedback */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.form.error {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* **MEJORAS PARA LA SECCIÓN DE RESERVAS** */
+#reservas {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#reservas h2 {
+  text-align: center;
+  color: #4B2E2B;
+  margin-bottom: 20px;
+}
+
+/* Estilos para horarios ocupados */
+.horarios-ocupados {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.horarios-ocupados h4 {
+  color: #856404;
+  margin-bottom: 10px;
+}
+
+.horarios-ocupados .horario-item {
+  display: inline-block;
+  background: #ffc107;
+  color: #212529;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
 /* Responsividad */
 @media (max-width: 768px) {
   .hero-overlay h1 {
@@ -314,9 +433,30 @@ button:disabled {
   .form label {
     grid-template-columns: 1fr;
   }
+  
+  .carrusel {
+    max-width: 100%;
+    padding: 10px;
+  }
+  
+  .carrusel-track .card {
+    min-width: 150px;
+  }
+  
+  .hero-overlay {
+    padding: 20px;
+    max-width: 90%;
+  }
+  
+  /* Ajustes para reservas en móvil */
+  #reservas {
+    padding: 15px;
+  }
+  
+  .reserva-info {
+    font-size: 0.9em;
+  }
 }
-
-
 
 /* Estilos para mensajes de error */
 .error-message {
@@ -354,23 +494,7 @@ button:disabled {
   color: #c62828;
 }
 
-/* Mejoras de responsive */
-@media (max-width: 768px) {
-  .carrusel {
-    max-width: 100%;
-    padding: 10px;
-  }
-  
-  .carrusel-track .card {
-    min-width: 150px;
-  }
-  
-  .hero-overlay {
-    padding: 20px;
-    max-width: 90%;
-  }
-}
-
+/* **ESTILOS PARA SISTEMA DE CALIFICACIONES** */
 .estrellas {
   display: flex;
   justify-content: center;
@@ -387,4 +511,67 @@ button:disabled {
 .estrella:hover,
 .estrella.activa {
   color: gold;
+}
+
+/* **INDICADORES VISUALES MEJORADOS** */
+.status-indicator {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status-disponible {
+  background: linear-gradient(45deg, #4caf50, #66bb6a);
+  color: white;
+}
+
+.status-ocupado {
+  background: linear-gradient(45deg, #f44336, #ef5350);
+  color: white;
+}
+
+.status-pendiente {
+  background: linear-gradient(45deg, #ff9800, #ffb74d);
+  color: white;
+}
+
+/* **ANIMACIONES SUAVES** */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* **TOOLTIPS PARA AYUDA** */
+.tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 1000;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
 }

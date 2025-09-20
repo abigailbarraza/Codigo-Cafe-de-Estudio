@@ -319,7 +319,72 @@ document.getElementById("formCalificacion").addEventListener("submit", async e =
   }
 });
 
-// ----------------- Reservas -----------------
+// ----------------- RESERVAS CON VALIDACIÓN DE DISPONIBILIDAD -----------------
+
+// **NUEVA FUNCIÓN: Verificar disponibilidad en tiempo real**
+async function verificarDisponibilidad() {
+  const tipo = document.getElementById("tipoReserva").value;
+  const fecha = document.getElementById("fechaReserva").value;
+  const hora = document.getElementById("horaReserva").value;
+  
+  if (!fecha || !hora) return;
+  
+  const messageDiv = document.getElementById("mensajeDisponibilidad");
+  if (!messageDiv) {
+    // Crear div para mostrar mensajes si no existe
+    const div = document.createElement("div");
+    div.id = "mensajeDisponibilidad";
+    div.style.marginTop = "10px";
+    div.style.padding = "10px";
+    div.style.borderRadius = "5px";
+    div.style.fontWeight = "bold";
+    document.getElementById("formReserva").appendChild(div);
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/verificar-disponibilidad?tipo=${tipo}&fecha=${fecha}&hora=${hora}`);
+    const data = await res.json();
+    
+    const msgDiv = document.getElementById("mensajeDisponibilidad");
+    if (data.disponible) {
+      msgDiv.textContent = "✅ Disponible";
+      msgDiv.style.backgroundColor = "#d4edda";
+      msgDiv.style.color = "#155724";
+      msgDiv.style.display = "block";
+    } else {
+      msgDiv.textContent = `❌ ${data.mensaje}`;
+      msgDiv.style.backgroundColor = "#f8d7da";
+      msgDiv.style.color = "#721c24";
+      msgDiv.style.display = "block";
+    }
+  } catch (error) {
+    console.error("Error al verificar disponibilidad:", error);
+  }
+}
+
+// **NUEVA FUNCIÓN: Mostrar horarios ocupados para una fecha**
+async function mostrarHorariosOcupados() {
+  const fecha = document.getElementById("fechaReserva").value;
+  if (!fecha) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/horarios-ocupados/${fecha}`);
+    const horarios = await res.json();
+    
+    console.log("Horarios ocupados para", fecha, ":", horarios);
+    
+    // Mostrar info visual (opcional)
+    const infoDiv = document.getElementById("infoHorarios");
+    if (infoDiv) {
+      const mesasOcupadas = horarios.mesa.length > 0 ? `Mesas ocupadas: ${horarios.mesa.join(', ')}` : '';
+      const pcsOcupadas = horarios.pc.length > 0 ? `PCs ocupadas: ${horarios.pc.join(', ')}` : '';
+      infoDiv.innerHTML = `<p style="font-size: 0.9em; color: #666;">${mesasOcupadas} ${pcsOcupadas}</p>`;
+    }
+  } catch (error) {
+    console.error("Error al obtener horarios ocupados:", error);
+  }
+}
+
 document.getElementById("formReserva").addEventListener("submit", async e => {
   e.preventDefault();
   if (!session) return alert("Debes iniciar sesión");
@@ -343,6 +408,10 @@ document.getElementById("formReserva").addEventListener("submit", async e => {
     if (data.success) {
       alert("✅ Reserva confirmada");
       document.getElementById("formReserva").reset();
+      // Limpiar mensaje de disponibilidad
+      const msgDiv = document.getElementById("mensajeDisponibilidad");
+      if (msgDiv) msgDiv.style.display = "none";
+      renderMisReservas();
     } else {
       alert(data.error || "Error al registrar la reserva");
     }
@@ -534,6 +603,15 @@ window.onload = async () => {
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById("fechaReserva").min = hoy;
     document.getElementById("fechaDevolucion").min = hoy;
+    
+    // **EVENTOS PARA VALIDACIÓN DE RESERVAS**
+    // Verificar disponibilidad cuando cambie el tipo, fecha u hora
+    document.getElementById("tipoReserva").addEventListener("change", verificarDisponibilidad);
+    document.getElementById("fechaReserva").addEventListener("change", () => {
+      mostrarHorariosOcupados();
+      verificarDisponibilidad();
+    });
+    document.getElementById("horaReserva").addEventListener("change", verificarDisponibilidad);
     
     await Promise.all([renderTopLibros(), renderLibros()]);
     
