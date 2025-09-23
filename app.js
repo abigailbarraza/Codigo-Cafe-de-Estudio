@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
           cerrarModalAuth();
           renderAuthButtons();
           alert("¡Bienvenido " + session.nombre + "!");
+          
           // actualizar vistas que dependan del usuario
           renderMisAlquileres();
           renderMisReservas();
@@ -537,49 +538,153 @@ async function renderHistorialAlquileres() {
   }
 }
 
-// ----------------- Carrusel -----------------
+// ----------------- Carrusel Mejorado -----------------
+let carrusel = {
+  posicion: 0,
+  anchoElemento: 0,
+  elementosVisibles: 4,
+  intervalo: null
+};
+
 async function renderTopLibros() {
   try {
     const res = await fetch(`${API_URL}/libros`);
     if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
     let lista = await res.json();
-    const recomendados = [...lista].sort(() => 0.5 - Math.random()).slice(0, 4);
+    const recomendados = [...lista].sort(() => 0.5 - Math.random()).slice(0, 6);
     const div = document.getElementById("carruselLibros");
     if (!div) return;
+    
     div.innerHTML = recomendados.map(b => `
-      <div class="card">
+      <div class="card carrusel-card">
         <img src="${b.img}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
         <h4>${b.titulo}</h4>
         <p>${b.autor}</p>
       </div>
     `).join("");
-    setTimeout(() => {
-      itemWidth = 0;
-      if (recomendados.length > 0) moverCarrusel(0);
-    }, 100);
+    
+    // Inicializar carrusel después de renderizar
+    setTimeout(() => inicializarCarrusel(), 100);
   } catch (error) {
     console.error("Error al cargar libros del carrusel:", error);
   }
 }
 
-let posCarrusel = 0, itemWidth = 0;
-function moverCarrusel(dir) {
+function inicializarCarrusel() {
   const track = document.getElementById("carruselLibros");
   if (!track || track.children.length === 0) {
     console.error("El carrusel no está disponible");
     return;
   }
-  if (itemWidth === 0) {
-    itemWidth = track.children[0].offsetWidth + 20;
+  
+  // Calcular el ancho de los elementos
+  const primerElemento = track.children[0];
+  if (primerElemento) {
+    const estilo = window.getComputedStyle(primerElemento);
+    const margenDerecho = parseInt(estilo.marginRight) || 0;
+    carrusel.anchoElemento = primerElemento.offsetWidth + margenDerecho;
   }
-  const total = track.children.length;
-  const visible = Math.min(4, total);
-  const max = -(itemWidth * (total - visible));
-  posCarrusel += dir * itemWidth;
-  if (posCarrusel > 0) posCarrusel = 0;
-  if (posCarrusel < max) posCarrusel = max;
-  track.style.transform = `translateX(${posCarrusel}px)`;
+  
+  // Ajustar elementos visibles según el tamaño de pantalla
+  if (window.innerWidth <= 768) {
+    carrusel.elementosVisibles = 2;
+  } else if (window.innerWidth <= 1024) {
+    carrusel.elementosVisibles = 3;
+  } else {
+    carrusel.elementosVisibles = 4;
+  }
+  
+  // Resetear posición
+  carrusel.posicion = 0;
+  actualizarCarrusel();
+  
+  // Iniciar auto-desplazamiento
+  iniciarAutoCarrusel();
 }
+
+function moverCarrusel(direccion) {
+  const track = document.getElementById("carruselLibros");
+  if (!track) return;
+  
+  const totalElementos = track.children.length;
+  const maxPosicion = Math.max(0, totalElementos - carrusel.elementosVisibles);
+  
+  carrusel.posicion += direccion;
+  
+  // Limitar la posición
+  if (carrusel.posicion < 0) {
+    carrusel.posicion = 0;
+  } else if (carrusel.posicion > maxPosicion) {
+    carrusel.posicion = maxPosicion;
+  }
+  
+  actualizarCarrusel();
+  reiniciarAutoCarrusel();
+}
+
+function actualizarCarrusel() {
+  const track = document.getElementById("carruselLibros");
+  if (!track) return;
+  
+  const desplazamiento = -carrusel.posicion * carrusel.anchoElemento;
+  track.style.transform = `translateX(${desplazamiento}px)`;
+  
+  // Actualizar estado de los botones
+  const totalElementos = track.children.length;
+  const btnPrev = document.querySelector('.carrusel .prev');
+  const btnNext = document.querySelector('.carrusel .next');
+  
+  if (btnPrev) {
+    btnPrev.disabled = carrusel.posicion === 0;
+    btnPrev.style.opacity = carrusel.posicion === 0 ? '0.5' : '1';
+  }
+  
+  if (btnNext) {
+    const maxPosicion = Math.max(0, totalElementos - carrusel.elementosVisibles);
+    btnNext.disabled = carrusel.posicion >= maxPosicion;
+    btnNext.style.opacity = carrusel.posicion >= maxPosicion ? '0.5' : '1';
+  }
+}
+
+function iniciarAutoCarrusel() {
+  // Limpiar intervalo existente
+  if (carrusel.intervalo) {
+    clearInterval(carrusel.intervalo);
+  }
+  
+  // Iniciar nuevo intervalo (solo si hay más elementos que los visibles)
+  const track = document.getElementById("carruselLibros");
+  if (track && track.children.length > carrusel.elementosVisibles) {
+    carrusel.intervalo = setInterval(() => {
+      moverCarrusel(1);
+    }, 5000);
+  }
+}
+
+function reiniciarAutoCarrusel() {
+  iniciarAutoCarrusel();
+}
+
+// Redimensionamiento de ventana
+window.addEventListener('resize', () => {
+  inicializarCarrusel();
+});
+
+// Pausar carrusel al hacer hover
+document.addEventListener('DOMContentLoaded', () => {
+  const carruselElement = document.querySelector('.carrusel');
+  if (carruselElement) {
+    carruselElement.addEventListener('mouseenter', () => {
+      if (carrusel.intervalo) {
+        clearInterval(carrusel.intervalo);
+      }
+    });
+    
+    carruselElement.addEventListener('mouseleave', () => {
+      iniciarAutoCarrusel();
+    });
+  }
+});
 
 // ----------------- Devolver libro -----------------
 async function devolverLibro(alquilerId) {

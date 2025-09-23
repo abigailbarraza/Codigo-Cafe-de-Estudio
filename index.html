@@ -32,14 +32,13 @@
       </button>
     </div>
 
-    <!-- Carrusel de libros recomendados -->
-    <h2 style="margin-top:30px;">Libros recomendados</h2>
-    <div class="carrusel">
-      <button class="prev" onclick="moverCarrusel(-1)">&#10094;</button>
-      <div class="carrusel-track" id="carruselLibros"></div>
-      <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
-    </div>
-  </section>
+<!-- sección del carrusel -->
+<div class="carrusel">
+  <button class="prev" onclick="moverCarrusel(-1)">&#10094;</button>
+  <div class="carrusel-track" id="carruselLibros"></div>
+  <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
+  <div class="carrusel-indicadores" id="carruselIndicadores"></div>
+</div>
 
   <!-- Información -->
   <section class="seccion" id="info">
@@ -71,7 +70,7 @@
     
     <!-- Foto del menú -->
     <div class="menu-foto">
-      <img src="menu.pdf" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
+      <img src="menu.jpg" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
     </div>
 
     <div id="listaMenu" class="grid"></div>
@@ -202,6 +201,7 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+
+<script src="app.js"></script>
 </body>
 </html>
