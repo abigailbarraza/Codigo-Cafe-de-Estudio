@@ -32,14 +32,14 @@
       </button>
     </div>
 
-<!-- sección del carrusel -->
-<div class="carrusel">
-  <button class="prev" onclick="moverCarrusel(-1)">&#10094;</button>
-  <div class="carrusel-track" id="carruselLibros"></div>
-  <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
-  <div class="carrusel-indicadores" id="carruselIndicadores"></div>
-</div>
-</section>
+    <!-- Carrusel de libros recomendados -->
+    <h2 style="margin-top:30px;">Libros recomendados</h2>
+    <div class="carrusel">
+      <button class="prev" onclick="moverCarrusel(-1)">&#10094;</button>
+      <div class="carrusel-track" id="carruselLibros"></div>
+      <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
+    </div>
+  </section>
 
   <!-- Información -->
   <section class="seccion" id="info">
@@ -67,29 +67,14 @@
   <!-- Menú -->
   <section class="seccion" id="menu">
     <h2>Nuestro menú</h2>
-    <div id="listaMenu" class="grid">
-      <!-- El menú se puede cargar dinámicamente o agregar contenido estático aquí -->
-      <div class="card">
-        <h4>☕ Espresso</h4>
-        <p>Café intenso y aromático</p>
-        <span>$350</span>
-      </div>
-      <div class="card">
-        <h4>🥐 Croissant</h4>
-        <p>Recién horneado</p>
-        <span>$280</span>
-      </div>
-      <div class="card">
-        <h4>🍰 Cheesecake</h4>
-        <p>Tradicional de frutos rojos</p>
-        <span>$450</span>
-      </div>
-    </div>
+    <div id="listaMenu" class="grid"></div>
     
-    <!-- Foto del menú -->
-    <div class="menu-foto">
-      <img src="https://via.placeholder.com/600x400?text=Menu+del+Cafe" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
-    </div>
+  <!-- Foto del menú -->
+  <div class="menu-foto">
+    <img src="menu.pdf" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
+  </div>
+
+  <div id="listaMenu" class="grid"></div>
   </section>
 
   <!-- Reservas CON VALIDACIÓN -->
@@ -124,7 +109,7 @@
     <div id="misReservas"></div>
   </section>
 
-  <!-- Libros -->
+ <!-- Libros -->
   <section class="seccion" id="libros">
     <h2>Libros disponibles</h2>
 
@@ -142,6 +127,7 @@
     <h2>Historial</h2>
     <div id="historialReservas"></div>
     <div id="historialLibros"></div>
+    
   </section>
 
   <!-- Modal login/registro -->
@@ -150,10 +136,10 @@
       <h3 id="tituloModal"></h3>
       <form id="formAuth" class="form">
         <input type="text" id="nombre" placeholder="Nombre (solo registro)">
-        <input type="email" id="email" placeholder="Correo" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
+        <input type="email" id="email" placeholder="Correo">
+        <input type="password" id="password" placeholder="Contraseña">
         <button type="submit" id="btnAuth">Aceptar</button>
-        <button type="button" onclick="cerrarModalAuth()">Cancelar</button>
+        <button type="button" onclick="cerrarModal()">Cancelar</button>
       </form>
     </div>
   </div>
@@ -162,61 +148,65 @@
   <div id="modalLibro" class="modal oculto">
     <div class="modal-content" style="max-width:500px;">
       <h3 id="detalleTitulo"></h3>
-      <img id="detalleImg" style="width:100%; border-radius:10px; margin:10px 0;" alt="Portada del libro">
+      <img id="detalleImg" style="width:100%; border-radius:10px; margin:10px 0;">
       <p id="detalleAutor"></p>
       <p id="detalleGenero"></p>
       <p id="detalleSinopsis"></p>
       <div id="detalleAcciones"></div>
-      <!-- 🔹 Se agregó este bloque para reseñas -->
-      <div id="detalleReseñas" style="margin-top:15px;"></div>
       <button onclick="cerrarModalLibro()">Cerrar</button>
     </div>
   </div>
 
   <!-- Modal alquiler -->
-  <div id="modalAlquiler" class="modal oculto">
-    <div class="modal-content" style="max-width:400px;">
-      <h3>Formulario de Alquiler</h3>
-      <form id="formAlquiler" class="form">
-        <label>Libro:
-          <select id="libroAlquiler"></select>
-        </label>
-        <label>Usuario:
-          <input type="text" id="usuarioAlquiler" readonly>
-        </label>
-        <label>Fecha de devolución:
-          <input type="date" id="fechaDevolucion" required>
-        </label>
-        <button type="submit">Confirmar</button>
-        <button type="button" onclick="cerrarModalAlquiler()">Cancelar</button>
-      </form>
-      <div id="msgAlquiler"></div>
-    </div>
+<div id="modalAlquiler" class="modal oculto">
+  <div class="modal-content" style="max-width:400px;">
+    <h3>Formulario de Alquiler</h3>
+    <form id="formAlquiler" class="form">
+      <label>Libro:
+        <select id="libroAlquiler"></select>
+      </label>
+      <label>Usuario:
+        <input type="text" id="usuarioAlquiler">
+      </label>
+      <label>Fecha de devolución:
+        <input type="date" id="fechaDevolucion">
+      </label>
+      <button type="submit">Confirmar</button>
+      <button type="button" onclick="cerrarModalAlquiler()">Cancelar</button>
+    </form>
+    <div id="msgAlquiler"></div>
   </div>
+</div>
 
-  <!-- Modal calificación -->
-  <div id="modalCalificacion" class="modal oculto">
-    <div class="modal-content">
-      <h3>Calificar libro</h3>
-      <form id="formCalificacion" class="form">
-        <input type="hidden" id="calificacionLibroId">
-        <div class="estrellas">
-          <span class="estrella" data-value="1">★</span>
-          <span class="estrella" data-value="2">★</span>
-          <span class="estrella" data-value="3">★</span>
-          <span class="estrella" data-value="4">★</span>
-          <span class="estrella" data-value="5">★</span>
-        </div>
-        <p id="textoCalificacion">Selecciona una calificación</p>
-        <label>Comentario (opcional):
-          <textarea id="comentarioCalificacion" rows="3"></textarea>
-        </label>
-        <button type="submit">Enviar</button>
-        <button type="button" onclick="cerrarModalCalificacion()">Cancelar</button>
-      </form>
-    </div>
+<!-- Modal calificación - versión corregida -->
+<div id="modalCalificacion" class="modal oculto">
+  <div class="modal-content">
+    <h3>Calificar libro</h3>
+    <form id="formCalificacion" class="form">
+      <input type="hidden" id="calificacionLibroId">
+      <div class="estrellas">
+        <span class="estrella" data-value="1">★</span>
+        <span class="estrella" data-value="2">★</span>
+        <span class="estrella" data-value="3">★</span>
+        <span class="estrella" data-value="4">★</span>
+        <span class="estrella" data-value="5">★</span>
+      </div>
+      <p id="textoCalificacion">Selecciona una calificación</p>
+      <label>Comentario (opcional):
+        <textarea id="comentarioCalificacion" rows="3"></textarea>
+      </label>
+      <button type="submit">Enviar</button>
+      <button type="button" onclick="cerrarModalCalificacion()">Cancelar</button>
+    </form>
   </div>
+</div>
 
-<script src="app.js"></script>
+
+  <footer>
+    <p>© 2025 Coffee&Letters · Hecho con ☕</p>
+  </footer>
+
+  <script src="app.js"></script>
+
 </body>
 </html>
