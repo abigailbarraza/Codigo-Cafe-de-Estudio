@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Café Hub</title>
+
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Playfair+Display:wght@400;600;700&family=Simonetta:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -31,6 +35,25 @@
         Conocenos
       </button>
     </div>
+    
+      <!-- Sección de descripción adicional -->
+  <div class="descripcion-adicional">
+    <h3>Nuestro espacio</h3>
+    <div class="descripcion-grid">
+      <div class="descripcion-item">
+        <h4>Zona de lectura</h4>
+        <p>Rincón tranquilo con sillones cómodos para sumergirte en tus libros preferidos.</p>
+      </div>
+      <div class="descripcion-item">
+        <h4>Café de especialidad</h4>
+        <p>Selección de granos premium y métodos de preparación artesanales.</p>
+      </div>
+      <div class="descripcion-item">
+        <h4>Espacios para trabajar</h4>
+        <p>Mesas amplias y conexión WiFi de alta velocidad para tus proyectos.</p>
+      </div>
+    </div>
+  </div>
 
     <!-- Carrusel de libros recomendados -->
     <h2 style="margin-top:30px;">Libros recomendados</h2>
@@ -42,27 +65,54 @@
   </section>
 
   <!-- Información -->
-  <section class="seccion" id="info">
-    <h2>Sobre Coffee&Letters</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>📍 Ubicación</h3>
-        <p>Av. Siempre Viva 123, CABA</p>
+<section class="seccion" id="info">
+  <h2>Sobre Coffee&Letters</h2>
+  
+  <!-- Cuadrados de información (como en la imagen adjunta) -->
+  <div class="info-grid">
+    <div class="info-square">
+      <h3>📍 Ubicación</h3>
+      <p>Av. Siempre Viva 123, CABA</p>
+    </div>
+    <div class="info-square">
+      <h3>🕒 Horarios</h3>
+      <p>Lunes a Domingo<br>9:00 – 22:00</p>
+    </div>
+    <div class="info-square">
+      <h3>📞 Contacto</h3>
+      <p>Tel: +54 11 1234-5678<br>Email: hola@cafehub.ar</p>
+    </div>
+    <div class="info-square">
+      <h3>☕ El lugar</h3>
+      <p>Un espacio pensado para leer, trabajar o relajarte con café de especialidad, libros y tecnología a tu alcance.</p>
+    </div>
+  </div>
+  
+
+
+    <!-- Galería de imágenes del local -->
+  <div class="galeria-section">
+    <h3>Galería de fotos del local</h3>
+    <div class="galeria-grid">
+      <div class="galeria-item">
+        <img src="imagen1.jpg" >
       </div>
-      <div class="card">
-        <h3>🕒 Horarios</h3>
-        <p>Lunes a Domingo<br>9:00 – 22:00</p>
+      <div class="galeria-item">
+        <img src="imagen2.jpg">
       </div>
-      <div class="card">
-        <h3>📞 Contacto</h3>
-        <p>Tel: +54 11 1234-5678<br>Email: hola@cafehub.ar</p>
+      <div class="galeria-item">
+        <img src="imagen3.jpg">
       </div>
-      <div class="card">
-        <h3>☕ El lugar</h3>
-        <p>Un espacio pensado para leer, trabajar o relajarte con café de especialidad, libros y tecnología a tu alcance.</p>
+      <div class="galeria-item">
+        <img src="imagen4.jpg">
+      </div>
+      <div class="galeria-item">
+        <img src="imagen5.jpg">
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 
   <!-- Menú -->
   <section class="seccion" id="menu">
@@ -77,58 +127,97 @@
   <div id="listaMenu" class="grid"></div>
   </section>
 
-  <!-- Reservas CON VALIDACIÓN -->
   <section class="seccion" id="reservas">
-    <h2>Reservas</h2>
-    <div class="reserva-info">
-      <p><strong>ℹ️ Información importante:</strong></p>
-      <ul>
-        <li>Solo se puede reservar una mesa o computadora por horario</li>
-        <li>Las reservas se confirman inmediatamente si están disponibles</li>
-        <li>Verifica la disponibilidad antes de confirmar</li>
-      </ul>
-    </div>
     
-    <form id="formReserva" class="form">
-      <label>Tipo:
-        <select id="tipoReserva">
-          <option value="mesa">Mesa</option>
-          <option value="pc">Computadora</option>
-        </select>
-      </label>
-      <label>Personas: <input type="number" id="personas" min="1" value="1"></label>
-      <label>Fecha: <input type="date" id="fechaReserva"></label>
-      <label>Hora: <input type="time" id="horaReserva"></label>
-      
-      <!-- Contenedor para mostrar disponibilidad -->
-      <div id="infoHorarios"></div>
-      <!-- Aquí se mostrará el mensaje de disponibilidad dinámicamente -->
-      
-      <button type="submit">Reservar</button>
-    </form>
-    <div id="misReservas"></div>
+    <div class="reserva-container">
+      <!-- Formulario de reservas -->
+      <div class="reserva-formulario">
+        <h3>FORMULARIO DE RESERVAS</h3>
+        <form id="formReserva" class="form-reserva">
+          <label>
+            <span>Tipo:</span>
+            <select id="tipoReserva">
+              <option value="mesa">Mesa</option>
+              <option value="pc">Computadora</option>
+            </select>
+          </label>
+          <label>
+            <span>Personas:</span>
+            <input type="number" id="personas" min="1" value="1">
+          </label>
+          <label>
+            <span>Fecha:</span>
+            <input type="date" id="fechaReserva">
+          </label>
+          <label>
+            <span>Hora:</span>
+            <input type="time" id="horaReserva">
+          </label>
+          
+          <!-- Contenedor para mostrar disponibilidad -->
+          <div id="infoHorarios" style="grid-column: 1 / -1;"></div>
+          
+          <button type="submit" class="btn-reservar">Reservar</button>
+        </form>
+      </div>
+
+      <!-- Historial de reservas -->
+      <div class="reserva-historial">
+        <h3>HISTORIAL DE RESERVAS</h3>
+        <div id="misReservas"></div>
+      </div>
+    </div>
   </section>
 
- <!-- Libros -->
+ 
+  <!-- Sección de Libros - ESTRUCTURA MODIFICADA -->
   <section class="seccion" id="libros">
     <h2>Libros disponibles</h2>
 
     <!-- 🔹 Tabs de géneros -->
     <div id="filtrosGeneros" class="filtros"></div>
 
-    <div id="listaLibros" class="grid"></div>
-
-    <h3>Mis alquileres</h3>
-    <div id="misAlquileres"></div>
+    <div class="libros-container">
+      <!-- Cuadrícula de libros disponibles -->
+      <div class="libros-disponibles">
+        <h3>LIBROS DISPONIBLES</h3>
+        <div class="libros-grid" id="listaLibros">
+          <!-- Los libros se cargarán aquí dinámicamente -->
+        </div>
+      </div>
+      
+      <!-- Historial de libros -->
+      <div class="libros-historial">
+        <h3>HISTORIAL DE LIBROS</h3>
+        <div class="historial-libros" id="misAlquileres">
+          <!-- El historial se cargará aquí dinámicamente -->
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Historial -->
-  <section class="seccion" id="historial">
-    <h2>Historial</h2>
-    <div id="historialReservas"></div>
-    <div id="historialLibros"></div>
+<section class="seccion" id="historial">
+  <h2>Historial</h2>
+  
+  <div class="historial-container">
+    <!-- Columna de HISTORIAL RESERVAS -->
+    <div class="historial-columna">
+      <div class="historial-header">
+        <h3>HISTORIAL RESERVAS</h3>
+      </div>
+      <div id="historialReservas" class="historial-contenido"></div>
+    </div>
     
-  </section>
+    <!-- Columna de HISTORIAL LIBROS -->
+    <div class="historial-columna">
+      <div class="historial-header">
+        <h3>HISTORIAL LIBROS</h3>
+      </div>
+      <div id="historialLibros" class="historial-contenido"></div>
+    </div>
+  </div>
+</section>
 
   <!-- Modal login/registro -->
   <div id="modalAuth" class="modal oculto">
