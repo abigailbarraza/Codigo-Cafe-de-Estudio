@@ -336,5 +336,54 @@ app.post("/devolver/:id", (req, res) => {
   });
 });
 
+// NUEVO ENDPOINT PARA AGREGAR EN server.js - Obtener todas las calificaciones de un libro
+
+// Obtener todas las calificaciones de un libro con información del usuario
+app.get("/calificaciones/:libroId", (req, res) => {
+  const libroId = req.params.libroId;
+
+  const query = `
+    SELECT c.*, u.nombre as nombre_usuario 
+    FROM calificaciones c 
+    JOIN users u ON c.usuario_id = u.id 
+    WHERE c.libro_id = ? 
+    ORDER BY c.created_at DESC
+  `;
+
+  db.all(query, [libroId], (err, rows) => {
+    if (err) {
+      console.error("Error al obtener calificaciones:", err);
+      return res.status(500).json({ error: "Error al obtener calificaciones" });
+    }
+    res.json(rows || []);
+  });
+});
+
+// TAMBIÉN MEJORAR EL ENDPOINT EXISTENTE DE CALIFICACIÓN INDIVIDUAL
+app.get("/calificacion/:libroId", (req, res) => {
+  const libroId = req.params.libroId;
+  const usuarioEmail = req.query.usuario;
+
+  if (!usuarioEmail) {
+    return res.status(400).json({ error: "Se requiere el email del usuario" });
+  }
+
+  // Obtener el ID del usuario a partir del email
+  db.get("SELECT id FROM users WHERE email = ?", [usuarioEmail], (err, userRow) => {
+    if (err || !userRow) {
+      return res.status(400).json({ error: "Usuario no válido" });
+    }
+
+    // Buscar la calificación del usuario para este libro
+    db.get("SELECT * FROM calificaciones WHERE usuario_id = ? AND libro_id = ?", 
+      [userRow.id, libroId], (err, calRow) => {
+      if (err) {
+        return res.status(500).json({ error: "Error en la base de datos" });
+      }
+      res.json(calRow || {}); // Si no existe, devuelve un objeto vacío
+    });
+  });
+});
+
 // ----------------- Start -----------------
 app.listen(3000, () => console.log("✅ Backend corriendo en http://localhost:3000"));

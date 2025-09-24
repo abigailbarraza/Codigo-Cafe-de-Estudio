@@ -185,7 +185,7 @@ nav button:hover { background: #ddd; }
 
 /* Footer */
 footer {
-  background: #222; color: #ccc; text-align: center; padding: 10px;
+  background: #222; color: #ccc; text-align: center; padding: 20px;
   margin-top: 20px;
 }
 
@@ -202,11 +202,11 @@ footer {
 .carrusel {
   position: relative;
   overflow: hidden;
-  max-width: 900px;
+  max-width: 800px;
   margin: 20px auto;
   background: #f0f0f0;
   border-radius: 12px;
-  padding: 20px;
+  padding: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   min-height: 250px;
 }
@@ -618,4 +618,266 @@ button:disabled {
 .reseña-card small {
   font-size: 12px;
   color: #666;
+}
+
+
+/* ESTILOS ADICIONALES PARA EL SISTEMA DE CALIFICACIONES */
+
+/* Modal de calificación mejorado */
+#modalCalificacion .modal-content {
+  max-width: 500px;
+  padding: 25px;
+}
+
+#modalCalificacion h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Estrellas interactivas */
+.estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 20px 0;
+}
+
+.estrella {
+  font-size: 2.5rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.estrella:hover {
+  transform: scale(1.1);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.estrella.activa {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Texto de calificación */
+#textoCalificacion {
+  text-align: center;
+  font-weight: bold;
+  color: #666;
+  margin: 15px 0;
+  font-size: 1.1em;
+}
+
+/* Área de comentario */
+#comentarioCalificacion {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+#comentarioCalificacion:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+/* Botones del modal de calificación */
+#modalCalificacion button[type="submit"] {
+  background: linear-gradient(45deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 10px;
+}
+
+#modalCalificacion button[type="submit"]:hover {
+  background: linear-gradient(45deg, #45a049, #5cb85c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+#modalCalificacion button[type="button"] {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#modalCalificacion button[type="button"]:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+/* Sección de calificaciones en el modal del libro */
+.seccion-calificaciones {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.seccion-calificaciones h4 {
+  color: #495057;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.promedio-calificacion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 1.1em;
+}
+
+.promedio-calificacion strong {
+  color: #ffd700;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Botón para mostrar/ocultar calificaciones */
+#btnMostrarCalificaciones {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
+
+#btnMostrarCalificaciones:hover {
+  background: linear-gradient(45deg, #0056b3, #003d82);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+}
+
+/* Tarjetas individuales de calificaciones */
+.calificacion-individual {
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+
+.calificacion-individual:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.calificacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calificacion-header strong {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.calificacion-estrellas {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.calificacion-comentario {
+  color: #666;
+  font-style: italic;
+  margin: 8px 0;
+  line-height: 1.4;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #007bff;
+}
+
+.calificacion-fecha {
+  font-size: 12px;
+  color: #999;
+  text-align: right;
+}
+
+/* Tu calificación personal */
+.mi-calificacion {
+  margin: 10px 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border-radius: 10px;
+  border-left: 4px solid #4caf50;
+}
+
+.mi-calificacion strong {
+  color: #2e7d32;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#listaCalificaciones {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.calificacion-individual {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Responsividad para móviles */
+@media (max-width: 768px) {
+  .estrella {
+    font-size: 2rem;
+  }
+  
+  .calificacion-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  #modalCalificacion .modal-content {
+    max-width: 90%;
+    padding: 20px;
+  }
+  
+  .promedio-calificacion {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
 }

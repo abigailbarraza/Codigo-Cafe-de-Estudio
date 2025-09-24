@@ -71,7 +71,7 @@
     
   <!-- Foto del menú -->
   <div class="menu-foto">
-    <img src="menu.pdf" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
+    <img src="menu.jpg" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
   </div>
 
   <div id="listaMenu" class="grid"></div>
@@ -178,7 +178,7 @@
   </div>
 </div>
 
-<!-- Modal calificación - versión corregida -->
+<!-- Modal calificación -->
 <div id="modalCalificacion" class="modal oculto">
   <div class="modal-content">
     <h3>Calificar libro</h3>
@@ -193,10 +193,12 @@
       </div>
       <p id="textoCalificacion">Selecciona una calificación</p>
       <label>Comentario (opcional):
-        <textarea id="comentarioCalificacion" rows="3"></textarea>
+        <textarea id="comentarioCalificacion" rows="3" placeholder="Comparte tu experiencia con este libro..."></textarea>
       </label>
-      <button type="submit">Enviar</button>
-      <button type="button" onclick="cerrarModalCalificacion()">Cancelar</button>
+      <div class="botones-modal">
+        <button type="submit">Enviar reseña</button>
+        <button type="button" onclick="cerrarModalCalificacion()">Cancelar</button>
+      </div>
     </form>
   </div>
 </div>

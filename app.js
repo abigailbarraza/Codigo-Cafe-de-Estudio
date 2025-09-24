@@ -238,11 +238,21 @@ async function renderMisAlquileres() {
 }
 
 // ----------------- Calificaciones -----------------
+// Agrega esta función en la sección de Calificaciones
 function abrirModalCalificacion(libroId) {
+  if (!session) {
+    alert("Debes iniciar sesión para calificar");
+    return;
+  }
+  
+  libroSeleccionado = libroId;
+  calificacionSeleccionada = 0;
+  
+  // Resetear el formulario
   document.getElementById("calificacionLibroId").value = libroId;
   document.getElementById("comentarioCalificacion").value = '';
-  calificacionSeleccionada = 0;
   resetEstrellas();
+  
   document.getElementById("modalCalificacion").classList.remove("oculto");
 }
 
@@ -319,6 +329,233 @@ document.getElementById("formCalificacion").addEventListener("submit", async e =
   }
 });
 
+// CORRECCIONES PARA EL SISTEMA DE CALIFICACIONES EN app.js
+
+// 1. ACTUALIZAR LA FUNCIÓN verDetalleLibro para mostrar calificaciones existentes
+async function verDetalleLibro(id) {
+  try {
+    const res = await fetch(`${API_URL}/libros/${id}`);
+    const libro = await res.json();
+    
+    document.getElementById("detalleTitulo").textContent = libro.titulo;
+    document.getElementById("detalleImg").src = libro.img;
+    document.getElementById("detalleImg").onerror = function() {
+      this.src = 'https://via.placeholder.com/150x200?text=Imagen+no+disponible';
+    };
+    document.getElementById("detalleAutor").textContent = "Autor: " + libro.autor;
+    document.getElementById("detalleGenero").textContent = "Género: " + libro.genero;
+    document.getElementById("detalleSinopsis").textContent = libro.sinopsis;
+    
+    const disponible = libro.copias > 0;
+    let botonAlquilar = disponible ? 
+      `<button onclick="prepararAlquiler(${libro.id})">Alquilar</button>` :
+      `<button disabled>No disponible</button>`;
+    
+    let botonCalificar = '';
+    let seccionCalificaciones = '';
+
+    if (session) {
+      try {
+        // Verificar si el usuario ya calificó este libro
+        const resCalificacion = await fetch(`${API_URL}/calificacion/${libro.id}?usuario=${session.email}`);
+        const calificacion = await resCalificacion.json();
+        
+        if (calificacion && calificacion.calificacion) {
+          // Usuario ya calificó - mostrar su calificación
+          botonCalificar = `
+            <div style="margin: 10px 0; padding: 10px; background: #e8f5e9; border-radius: 8px;">
+              <strong>Tu calificación:</strong> ${calificacion.calificacion} ⭐
+              ${calificacion.comentario ? `<br><em>"${calificacion.comentario}"</em>` : ''}
+            </div>`;
+        } else {
+          // Verificar si ha alquilado el libro para poder calificar
+          const resAlquiler = await fetch(`${API_URL}/alquileres/${session.email}`);
+          const alquileres = await resAlquiler.json();
+          const haAlquilado = alquileres.some(a => a.libro_id == libro.id);
+          
+          if (haAlquilado) {
+            botonCalificar = `<button onclick="abrirModalCalificacion(${libro.id})" style="background: #4caf50; color: white; margin-left: 10px;">💭 Mi opinión</button>`;
+          }
+        }
+      } catch (error) {
+        console.error("Error al verificar calificación:", error);
+      }
+    }
+
+    // Cargar todas las calificaciones del libro
+    try {
+      const resTodasCalificaciones = await fetch(`${API_URL}/calificaciones/${libro.id}`);
+      const todasCalificaciones = await resTodasCalificaciones.json();
+      
+      if (todasCalificaciones && todasCalificaciones.length > 0) {
+        const promedio = (todasCalificaciones.reduce((sum, cal) => sum + cal.calificacion, 0) / todasCalificaciones.length).toFixed(1);
+        
+        seccionCalificaciones = `
+          <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <h4>Calificaciones (${todasCalificaciones.length})</h4>
+            <div style="margin: 10px 0;">
+              <strong>Promedio: ${promedio} ⭐</strong>
+            </div>
+            <button onclick="toggleCalificaciones()" id="btnMostrarCalificaciones" style="background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+              Ver todas las opiniones
+            </button>
+            <div id="listaCalificaciones" style="display: none; margin-top: 15px;">
+              ${todasCalificaciones.map(cal => `
+                <div style="border: 1px solid #ddd; padding: 12px; margin: 8px 0; border-radius: 8px; background: white;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong>${cal.nombre_usuario}</strong>
+                    <span style="color: #f39c12; font-weight: bold;">${cal.calificacion} ⭐</span>
+                  </div>
+                  ${cal.comentario ? `<p style="color: #666; font-style: italic; margin: 0;">"${cal.comentario}"</p>` : ''}
+                  <small style="color: #999;">${new Date(cal.created_at).toLocaleDateString()}</small>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+      }
+    } catch (error) {
+      console.error("Error al cargar calificaciones:", error);
+    }
+    
+    document.getElementById("detalleAcciones").innerHTML = botonAlquilar + botonCalificar + seccionCalificaciones;
+    document.getElementById("modalLibro").classList.remove("oculto");
+  } catch (error) {
+    alert("Error al cargar detalles del libro");
+  }
+}
+
+// 2. NUEVA FUNCIÓN para mostrar/ocultar calificaciones
+function toggleCalificaciones() {
+  const lista = document.getElementById("listaCalificaciones");
+  const boton = document.getElementById("btnMostrarCalificaciones");
+  
+  if (lista.style.display === "none") {
+    lista.style.display = "block";
+    boton.textContent = "Ocultar opiniones";
+  } else {
+    lista.style.display = "none";
+    boton.textContent = "Ver todas las opiniones";
+  }
+}
+
+// 3. MEJORAR la función abrirModalCalificacion
+function abrirModalCalificacion(libroId) {
+  if (!session) {
+    alert("Debes iniciar sesión para calificar");
+    return;
+  }
+  
+  document.getElementById("calificacionLibroId").value = libroId;
+  document.getElementById("comentarioCalificacion").value = '';
+  calificacionSeleccionada = 0;
+  resetEstrellas();
+  document.getElementById("modalCalificacion").classList.remove("oculto");
+}
+
+// 4. MEJORAR el envío de calificaciones
+document.getElementById("formCalificacion").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!session) {
+    alert("Debes iniciar sesión");
+    return;
+  }
+  
+  const libroId = document.getElementById("calificacionLibroId").value;
+  const comentario = document.getElementById("comentarioCalificacion").value.trim();
+  
+  if (calificacionSeleccionada === 0) {
+    alert("Selecciona una calificación");
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/calificacion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        libroId,
+        usuario: session.email,
+        calificacion: calificacionSeleccionada,
+        comentario
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      alert("✅ Calificación enviada exitosamente");
+      cerrarModalCalificacion();
+      // Recargar los detalles del libro para mostrar la nueva calificación
+      verDetalleLibro(libroId);
+    } else {
+      alert(data.error || "Error al enviar la calificación");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error de conexión");
+  }
+});
+
+// 5. MEJORAR resetEstrellas y la inicialización
+function resetEstrellas() {
+  const estrellas = document.querySelectorAll('.estrella');
+  estrellas.forEach(star => {
+    star.classList.remove('activa');
+    star.style.color = '#ccc';
+  });
+  document.getElementById("textoCalificacion").textContent = "Selecciona una calificación";
+}
+
+function inicializarEstrellas() {
+  document.querySelectorAll('.estrella').forEach((star, index) => {
+    star.addEventListener('click', () => {
+      const value = parseInt(star.getAttribute('data-value'));
+      calificacionSeleccionada = value;
+      
+      // Resetear todas las estrellas
+      document.querySelectorAll('.estrella').forEach(s => {
+        s.classList.remove('activa');
+        s.style.color = '#ccc';
+      });
+      
+      // Activar las estrellas hasta el valor seleccionado
+      document.querySelectorAll('.estrella').forEach(s => {
+        if (parseInt(s.getAttribute('data-value')) <= value) {
+          s.classList.add('activa');
+          s.style.color = 'gold';
+        }
+      });
+      
+      const ratings = ["", "Muy malo", "Regular", "Bueno", "Muy bueno", "Excelente"];
+      document.getElementById("textoCalificacion").textContent = 
+        `${ratings[value]} (${value} estrellas)`;
+    });
+    
+    // Efecto hover
+    star.addEventListener('mouseenter', () => {
+      const value = parseInt(star.getAttribute('data-value'));
+      document.querySelectorAll('.estrella').forEach(s => {
+        if (parseInt(s.getAttribute('data-value')) <= value) {
+          s.style.color = 'gold';
+        } else {
+          s.style.color = '#ccc';
+        }
+      });
+    });
+    
+    star.addEventListener('mouseleave', () => {
+      // Restaurar el estado actual de las estrellas
+      document.querySelectorAll('.estrella').forEach(s => {
+        const starValue = parseInt(s.getAttribute('data-value'));
+        if (starValue <= calificacionSeleccionada) {
+          s.style.color = 'gold';
+        } else {
+          s.style.color = '#ccc';
+        }
+      });
+    });
+  });
+}
 // ----------------- RESERVAS CON VALIDACIÓN DE DISPONIBILIDAD -----------------
 
 // **NUEVA FUNCIÓN: Verificar disponibilidad en tiempo real**
