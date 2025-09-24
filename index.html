@@ -39,6 +39,7 @@
   <button class="next" onclick="moverCarrusel(1)">&#10095;</button>
   <div class="carrusel-indicadores" id="carruselIndicadores"></div>
 </div>
+</section>
 
   <!-- Información -->
   <section class="seccion" id="info">
@@ -66,14 +67,29 @@
   <!-- Menú -->
   <section class="seccion" id="menu">
     <h2>Nuestro menú</h2>
-    <div id="listaMenu" class="grid"></div>
+    <div id="listaMenu" class="grid">
+      <!-- El menú se puede cargar dinámicamente o agregar contenido estático aquí -->
+      <div class="card">
+        <h4>☕ Espresso</h4>
+        <p>Café intenso y aromático</p>
+        <span>$350</span>
+      </div>
+      <div class="card">
+        <h4>🥐 Croissant</h4>
+        <p>Recién horneado</p>
+        <span>$280</span>
+      </div>
+      <div class="card">
+        <h4>🍰 Cheesecake</h4>
+        <p>Tradicional de frutos rojos</p>
+        <span>$450</span>
+      </div>
+    </div>
     
     <!-- Foto del menú -->
     <div class="menu-foto">
-      <img src="menu.jpg" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
+      <img src="https://via.placeholder.com/600x400?text=Menu+del+Cafe" alt="Foto del menú" style="max-width:100%; border-radius:12px; margin:20px 0;">
     </div>
-
-    <div id="listaMenu" class="grid"></div>
   </section>
 
   <!-- Reservas CON VALIDACIÓN -->
@@ -134,10 +150,10 @@
       <h3 id="tituloModal"></h3>
       <form id="formAuth" class="form">
         <input type="text" id="nombre" placeholder="Nombre (solo registro)">
-        <input type="email" id="email" placeholder="Correo">
-        <input type="password" id="password" placeholder="Contraseña">
+        <input type="email" id="email" placeholder="Correo" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
         <button type="submit" id="btnAuth">Aceptar</button>
-        <button type="button" onclick="cerrarModal()">Cancelar</button>
+        <button type="button" onclick="cerrarModalAuth()">Cancelar</button>
       </form>
     </div>
   </div>
@@ -146,7 +162,7 @@
   <div id="modalLibro" class="modal oculto">
     <div class="modal-content" style="max-width:500px;">
       <h3 id="detalleTitulo"></h3>
-      <img id="detalleImg" style="width:100%; border-radius:10px; margin:10px 0;">
+      <img id="detalleImg" style="width:100%; border-radius:10px; margin:10px 0;" alt="Portada del libro">
       <p id="detalleAutor"></p>
       <p id="detalleGenero"></p>
       <p id="detalleSinopsis"></p>
@@ -166,10 +182,10 @@
           <select id="libroAlquiler"></select>
         </label>
         <label>Usuario:
-          <input type="text" id="usuarioAlquiler">
+          <input type="text" id="usuarioAlquiler" readonly>
         </label>
         <label>Fecha de devolución:
-          <input type="date" id="fechaDevolucion">
+          <input type="date" id="fechaDevolucion" required>
         </label>
         <button type="submit">Confirmar</button>
         <button type="button" onclick="cerrarModalAlquiler()">Cancelar</button>
@@ -200,7 +216,6 @@
       </form>
     </div>
   </div>
-
 
 <script src="app.js"></script>
 </body>

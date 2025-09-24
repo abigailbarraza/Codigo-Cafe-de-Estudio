@@ -1,4 +1,4 @@
-// app.js
+// app.js - Versión corregida
 const API_URL = "http://localhost:3000";
 let session = JSON.parse(localStorage.getItem("session")) || null;
 let libroSeleccionado = null;
@@ -8,11 +8,19 @@ let seccionActual = "home";
 // ----------------- Navegación -----------------
 function mostrarSeccion(id) {
   if (id === seccionActual) return;
-  document.getElementById(seccionActual).classList.remove("activa");
-  document.getElementById(seccionActual).style.display = "none";
-  const target = document.getElementById(id);
-  target.style.display = "block";
-  setTimeout(() => target.classList.add("activa"), 10);
+  
+  const currentSection = document.getElementById(seccionActual);
+  const targetSection = document.getElementById(id);
+  
+  if (!currentSection || !targetSection) {
+    console.error("Sección no encontrada:", id);
+    return;
+  }
+  
+  currentSection.classList.remove("activa");
+  currentSection.style.display = "none";
+  targetSection.style.display = "block";
+  setTimeout(() => targetSection.classList.add("activa"), 10);
   seccionActual = id;
 
   // Cargar datos específicos de la sección
@@ -58,6 +66,7 @@ function logout() {
   session = null;
   localStorage.removeItem("session");
   renderAuthButtons();
+  mostrarSeccion("home");
 }
 
 // ----------------- Login/Registro -----------------
@@ -72,6 +81,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("password").value.trim();
       const titulo = document.getElementById("tituloModal").textContent;
       const endpoint = titulo.includes("Registrarse") ? "/register" : "/login";
+
+      if (!email || !password) {
+        alert("Por favor completa todos los campos requeridos");
+        return;
+      }
+
+      if (endpoint === "/register" && !nombre) {
+        alert("El nombre es requerido para registrarse");
+        return;
+      }
 
       try {
         const res = await fetch(`${API_URL}${endpoint}`, {
@@ -96,11 +115,137 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Error auth:", error);
+        alert("Error de conexión. Asegúrate de que el servidor esté funcionando.");
+      }
+    });
+  }
+
+  // Inicializar otros listeners de formularios
+  initializeFormListeners();
+});
+
+function initializeFormListeners() {
+  // Form Alquiler
+  const formAlquiler = document.getElementById("formAlquiler");
+  if (formAlquiler) {
+    formAlquiler.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!session) return alert("Debes iniciar sesión");
+
+      const fecha = document.getElementById("fechaDevolucion").value;
+      if (!fecha) return alert("Selecciona una fecha de devolución");
+
+      try {
+        const res = await fetch(`${API_URL}/alquileres`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idLibro: libroSeleccionado,
+            usuario: session.email,
+            fechaDev: fecha
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("msgAlquiler").innerText = "✅ Alquiler exitoso";
+          setTimeout(() => {
+            cerrarModalAlquiler();
+            document.getElementById("msgAlquiler").innerText = "";
+            renderLibros();
+            renderMisAlquileres();
+          }, 1200);
+        } else {
+          alert(data.error || "Error al registrar el alquiler");
+        }
+      } catch (error) {
+        console.error("Error al alquilar:", error);
         alert("Error de conexión");
       }
     });
   }
-});
+
+  // Form Reserva
+  const formReserva = document.getElementById("formReserva");
+  if (formReserva) {
+    formReserva.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!session) return alert("Debes iniciar sesión");
+
+      const tipo = document.getElementById("tipoReserva").value;
+      const personas = document.getElementById("personas").value;
+      const fecha = document.getElementById("fechaReserva").value;
+      const hora = document.getElementById("horaReserva").value;
+      
+      if (!fecha || !hora) return alert("Completa fecha y hora");
+
+      try {
+        const res = await fetch(`${API_URL}/reservas`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tipo, personas, fecha, hora, usuario: session.email })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert("✅ Reserva confirmada");
+          formReserva.reset();
+          const msgDiv = document.getElementById("mensajeDisponibilidad");
+          if (msgDiv) msgDiv.style.display = "none";
+          renderMisReservas();
+        } else {
+          alert(data.error || "Error al registrar la reserva");
+        }
+      } catch (error) {
+        console.error("Error reservar:", error);
+        alert("Error de conexión");
+      }
+    });
+  }
+
+  // Form Calificación
+  const formCalificacion = document.getElementById("formCalificacion");
+  if (formCalificacion) {
+    formCalificacion.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!session) return alert("Debes iniciar sesión");
+
+      const libroId = document.getElementById("calificacionLibroId").value;
+      const comentario = document.getElementById("comentarioCalificacion").value;
+
+      if (calificacionSeleccionada === 0) {
+        alert("Selecciona una calificación");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/calificacion`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            libroId,
+            usuario: session.email,
+            calificacion: calificacionSeleccionada,
+            comentario
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert("✅ Calificación enviada");
+          cerrarModalCalificacion();
+          // refrescar modal del libro si está abierto
+          verDetalleLibro(libroId);
+        } else {
+          alert(data.error || "Error al enviar la calificación");
+        }
+      } catch (error) {
+        console.error("Error al enviar calificación:", error);
+        alert("Error de conexión");
+      }
+    });
+  }
+}
 
 // ----------------- Libros -----------------
 async function renderLibros(filtroGenero = null) {
@@ -127,7 +272,7 @@ async function renderLibros(filtroGenero = null) {
     div.innerHTML = lista.length > 0 ? lista.map(b => {
       const disponible = b.copias > 0 ? "Disponible" : "No disponible";
       return `<div class="card" onclick="verDetalleLibro(${b.id})">
-                <img src="${b.img}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
+                <img src="${b.img || 'https://via.placeholder.com/150x200?text=Sin+imagen'}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
                 <h4>${b.titulo}</h4>
                 <p>${b.autor}</p>
                 <span class="${b.copias > 0 ? 'disponible' : 'no-disponible'}">${disponible}</span>
@@ -148,10 +293,13 @@ async function verDetalleLibro(id) {
     const libro = await res.json();
 
     document.getElementById("detalleTitulo").textContent = libro.titulo;
-    document.getElementById("detalleImg").src = libro.img || '';
+    const imgElement = document.getElementById("detalleImg");
+    imgElement.src = libro.img || 'https://via.placeholder.com/300x400?text=Sin+imagen';
+    imgElement.alt = `Portada de ${libro.titulo}`;
+    
     document.getElementById("detalleAutor").textContent = "Autor: " + libro.autor;
     document.getElementById("detalleGenero").textContent = "Género: " + libro.genero;
-    document.getElementById("detalleSinopsis").textContent = libro.sinopsis || "";
+    document.getElementById("detalleSinopsis").textContent = libro.sinopsis || "Sin sinopsis disponible";
 
     const disponible = libro.copias > 0;
     let botonAlquilar = disponible ?
@@ -201,64 +349,30 @@ async function verDetalleLibro(id) {
 }
 
 function cerrarModalLibro() {
-  document.getElementById("modalLibro").classList.add("oculto");
+  const modal = document.getElementById("modalLibro");
+  if (modal) modal.classList.add("oculto");
 }
 
 // ----------------- Alquileres -----------------
 function prepararAlquiler(idLibro) {
   if (!session) return alert("Debes iniciar sesión");
   libroSeleccionado = idLibro;
+  
   // cargar el select de libros en el modalAlquiler (si existe)
   const select = document.getElementById("libroAlquiler");
   if (select) {
-    select.innerHTML = `<option value="${idLibro}">${idLibro}</option>`;
+    select.innerHTML = `<option value="${idLibro}">Libro ID: ${idLibro}</option>`;
   }
   const usuario = document.getElementById("usuarioAlquiler");
   if (usuario) usuario.value = session.email;
-  document.getElementById("modalAlquiler").classList.remove("oculto");
+  
+  const modal = document.getElementById("modalAlquiler");
+  if (modal) modal.classList.remove("oculto");
 }
 
 function cerrarModalAlquiler() {
-  document.getElementById("modalAlquiler").classList.add("oculto");
-}
-
-const formAlquiler = document.getElementById("formAlquiler");
-if (formAlquiler) {
-  formAlquiler.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!session) return alert("Debes iniciar sesión");
-
-    const fecha = document.getElementById("fechaDevolucion").value;
-    if (!fecha) return alert("Selecciona una fecha de devolución");
-
-    try {
-      const res = await fetch(`${API_URL}/alquileres`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idLibro: libroSeleccionado,
-          usuario: session.email,
-          fechaDev: fecha
-        })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        document.getElementById("msgAlquiler").innerText = "✅ Alquiler exitoso";
-        setTimeout(() => {
-          cerrarModalAlquiler();
-          document.getElementById("msgAlquiler").innerText = "";
-          renderLibros();
-          renderMisAlquileres();
-        }, 1200);
-      } else {
-        alert(data.error || "Error al registrar el alquiler");
-      }
-    } catch (error) {
-      console.error("Error al alquilar:", error);
-      alert("Error de conexión");
-    }
-  });
+  const modal = document.getElementById("modalAlquiler");
+  if (modal) modal.classList.add("oculto");
 }
 
 async function renderMisAlquileres() {
@@ -281,20 +395,28 @@ async function renderMisAlquileres() {
       `).join("") || "<p>No tienes alquileres activos.</p>");
   } catch (error) {
     console.error("Error al cargar alquileres:", error);
+    if (div) div.innerHTML = "<p>Error al cargar alquileres.</p>";
   }
 }
 
 // ----------------- Calificaciones (modal estrellas) -----------------
 function abrirModalCalificacion(libroId) {
+  if (!session) {
+    alert('Inicia sesión para dejar tu opinión');
+    return;
+  }
+  
   document.getElementById("calificacionLibroId").value = libroId;
   document.getElementById("comentarioCalificacion").value = '';
   calificacionSeleccionada = 0;
   resetEstrellas();
-  document.getElementById("modalCalificacion").classList.remove("oculto");
+  const modal = document.getElementById("modalCalificacion");
+  if (modal) modal.classList.remove("oculto");
 }
 
 function cerrarModalCalificacion() {
-  document.getElementById("modalCalificacion").classList.add("oculto");
+  const modal = document.getElementById("modalCalificacion");
+  if (modal) modal.classList.add("oculto");
 }
 
 function resetEstrellas() {
@@ -317,48 +439,6 @@ function inicializarEstrellas() {
       const texto = document.getElementById("textoCalificacion");
       if (texto) texto.textContent = `${ratings[value]} (${value} estrellas)`;
     });
-  });
-}
-
-const formCalificacion = document.getElementById("formCalificacion");
-if (formCalificacion) {
-  formCalificacion.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!session) return alert("Debes iniciar sesión");
-
-    const libroId = document.getElementById("calificacionLibroId").value;
-    const comentario = document.getElementById("comentarioCalificacion").value;
-
-    if (calificacionSeleccionada === 0) {
-      alert("Selecciona una calificación");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_URL}/calificacion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          libroId,
-          usuario: session.email,
-          calificacion: calificacionSeleccionada,
-          comentario
-        })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        alert("✅ Calificación enviada");
-        cerrarModalCalificacion();
-        // refrescar modal del libro si está abierto
-        verDetalleLibro(libroId);
-      } else {
-        alert(data.error || "Error al enviar la calificación");
-      }
-    } catch (error) {
-      console.error("Error al enviar calificación:", error);
-      alert("Error de conexión");
-    }
   });
 }
 
@@ -415,41 +495,6 @@ async function mostrarHorariosOcupados() {
   } catch (error) {
     console.error("Error obtener horarios ocupados:", error);
   }
-}
-
-const formReserva = document.getElementById("formReserva");
-if (formReserva) {
-  formReserva.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!session) return alert("Debes iniciar sesión");
-
-    const tipo = document.getElementById("tipoReserva").value;
-    const personas = document.getElementById("personas").value;
-    const fecha = document.getElementById("fechaReserva").value;
-    const hora = document.getElementById("horaReserva").value;
-    if (!fecha || !hora) return alert("Completa fecha y hora");
-
-    try {
-      const res = await fetch(`${API_URL}/reservas`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, personas, fecha, hora, usuario: session.email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("✅ Reserva confirmada");
-        formReserva.reset();
-        const msgDiv = document.getElementById("mensajeDisponibilidad");
-        if (msgDiv) msgDiv.style.display = "none";
-        renderMisReservas();
-      } else {
-        alert(data.error || "Error al registrar la reserva");
-      }
-    } catch (error) {
-      console.error("Error reservar:", error);
-      alert("Error de conexión");
-    }
-  });
 }
 
 async function renderMisReservas(elementId = 'misReservas') {
@@ -556,8 +601,8 @@ async function renderTopLibros() {
     if (!div) return;
     
     div.innerHTML = recomendados.map(b => `
-      <div class="card carrusel-card">
-        <img src="${b.img}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
+      <div class="card carrusel-card" onclick="verDetalleLibro(${b.id})">
+        <img src="${b.img || 'https://via.placeholder.com/150x200?text=Sin+imagen'}" alt="${b.titulo}" onerror="this.src='https://via.placeholder.com/150x200?text=Imagen+no+disponible'">
         <h4>${b.titulo}</h4>
         <p>${b.autor}</p>
       </div>
@@ -567,6 +612,8 @@ async function renderTopLibros() {
     setTimeout(() => inicializarCarrusel(), 100);
   } catch (error) {
     console.error("Error al cargar libros del carrusel:", error);
+    const div = document.getElementById("carruselLibros");
+    if (div) div.innerHTML = "<p>Error al cargar libros recomendados</p>";
   }
 }
 
@@ -656,7 +703,15 @@ function iniciarAutoCarrusel() {
   const track = document.getElementById("carruselLibros");
   if (track && track.children.length > carrusel.elementosVisibles) {
     carrusel.intervalo = setInterval(() => {
-      moverCarrusel(1);
+      const totalElementos = track.children.length;
+      const maxPosicion = Math.max(0, totalElementos - carrusel.elementosVisibles);
+      
+      if (carrusel.posicion >= maxPosicion) {
+        carrusel.posicion = 0;
+      } else {
+        carrusel.posicion++;
+      }
+      actualizarCarrusel();
     }, 5000);
   }
 }
@@ -720,7 +775,7 @@ async function verTodasReseñas(libroId) {
       modal = document.createElement("div");
       modal.id = "modalResenas";
       modal.className = "modal";
-      modal.style.zIndex = 2000;
+      modal.style.zIndex = "2000";
       modal.innerHTML = `<div class="modal-content" id="modalResenasContent" style="max-width:700px; overflow:auto;"></div>`;
       document.body.appendChild(modal);
     }
@@ -833,10 +888,6 @@ window.onload = async () => {
     await Promise.all([renderTopLibros(), renderLibros()]);
 
     console.log("Datos cargados correctamente");
-
-    setInterval(() => {
-      if (seccionActual === "home") moverCarrusel(1);
-    }, 4000);
 
   } catch (error) {
     console.error("Error en la inicialización:", error);
