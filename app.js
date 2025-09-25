@@ -24,7 +24,85 @@ function mostrarSeccion(id) {
   } else if (id === "reservas") {
     renderMisReservas();
   }
+  else if (id === "libros") {
+  renderLibros();
+  renderFiltrosGeneros(); // 🔹 cargar botones de géneros
+  renderMisAlquileres();
+  
 }
+
+}
+
+// -------- Carrusel Libros Recomendados --------
+let carruselIndex = 0;
+let carruselItems = [];
+const visibleItems = 5; // 🔹 ahora mostramos 5 a la vez
+
+async function cargarCarruselLibros() {
+  try {
+    const res = await fetch(`${API_URL}/libros`);
+    const libros = await res.json();
+    const librosRandom = libros.sort(() => Math.random() - 0.5).slice(0, 10); // 🔹 ahora 10 libros
+
+    const track = document.getElementById("carruselLibros");
+    track.innerHTML = librosRandom.map(l => `
+      <div class="carrusel-item" onclick="verDetalleLibro(${l.id})">
+        <img src="${l.img}" alt="${l.titulo}"
+             onerror="this.src='https://via.placeholder.com/150x200?text=Sin+imagen'">
+        <h4>${l.titulo}</h4>
+        <p>${l.autor}</p>
+      </div>
+    `).join("");
+
+    carruselItems = track.children;
+    carruselIndex = 0;
+    actualizarCarrusel();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function moverCarrusel(dir) {
+  const visible = getVisibleItems();
+  const maxIndex = carruselItems.length - visible;
+
+  carruselIndex += dir;
+  if (carruselIndex < 0) carruselIndex = 0;
+  if (carruselIndex > maxIndex) carruselIndex = maxIndex;
+
+  actualizarCarrusel();
+}
+
+
+function actualizarCarrusel() {
+  const track = document.getElementById("carruselLibros");
+  const anchoItem = carruselItems[0]?.offsetWidth + 30 || 200;
+  track.style.transform = `translateX(-${carruselIndex * anchoItem}px)`;
+
+  const visible = getVisibleItems();                  // 👈 recalculamos
+  const maxIndex = carruselItems.length - visible;     // 👈 usamos visible real
+
+  const btnPrev = document.querySelector(".carrusel button.prev");
+  const btnNext = document.querySelector(".carrusel button.next");
+
+  btnPrev.disabled = carruselIndex === 0;
+  btnNext.disabled = carruselIndex >= maxIndex;
+
+  btnPrev.style.opacity = btnPrev.disabled ? "0.4" : "1";
+  btnNext.style.opacity = btnNext.disabled ? "0.4" : "1";
+}
+function getVisibleItems() {
+  const track = document.getElementById("carruselLibros");
+  const containerWidth = document.querySelector(".carrusel").offsetWidth;
+  const itemWidth = carruselItems[0]?.offsetWidth + 30 || 200;
+  return Math.floor(containerWidth / itemWidth);
+}
+
+
+
+// Cargar cuando se inicia la app
+document.addEventListener("DOMContentLoaded", cargarCarruselLibros);
+
 
 // ----------------- Auth -----------------
 function renderAuthButtons() {
@@ -113,6 +191,68 @@ async function renderLibros(filtroGenero = null) {
     document.getElementById("listaLibros").innerHTML = "<p>Error al cargar los libros. Intenta nuevamente.</p>";
   }
 }
+
+// ----------------- Filtros de Géneros -----------------
+async function renderFiltrosGeneros() {
+  try {
+    const res = await fetch(`${API_URL}/libros`);
+    const libros = await res.json();
+
+    // Obtener géneros únicos
+    const generos = [...new Set(libros.map(l => l.genero))];
+
+    const contenedor = document.getElementById("filtrosGeneros");
+    contenedor.innerHTML = `
+      <button onclick="renderLibros('todos')" class="filtro activo">Todos</button>
+      ${generos.map(g => `
+        <button onclick="renderLibros('${g}')">${g}</button>
+      `).join("")}
+    `;
+
+    // Resaltar botón activo
+    contenedor.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", e => {
+        contenedor.querySelectorAll("button").forEach(b => b.classList.remove("activo"));
+        e.target.classList.add("activo");
+      });
+    });
+
+  } catch (error) {
+    console.error("Error al cargar géneros:", error);
+  }
+}
+
+
+// ----------------- Filtros de Géneros -----------------
+async function renderFiltrosGeneros() {
+  try {
+    const res = await fetch(`${API_URL}/libros`);
+    const libros = await res.json();
+
+    // Obtener géneros únicos
+    const generos = [...new Set(libros.map(l => l.genero))];
+
+    const contenedor = document.getElementById("filtrosGeneros");
+    contenedor.innerHTML = `
+      <button onclick="renderLibros('todos')" class="filtro activo">Todos</button>
+      ${generos.map(g => `
+        <button onclick="renderLibros('${g}')">${g}</button>
+      `).join("")}
+    `;
+
+    // Resaltar botón activo
+    contenedor.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", e => {
+        contenedor.querySelectorAll("button").forEach(b => b.classList.remove("activo"));
+        e.target.classList.add("activo");
+      });
+    });
+
+  } catch (error) {
+    console.error("Error al cargar géneros:", error);
+  }
+}
+
 
 async function verDetalleLibro(id) {
   try {
